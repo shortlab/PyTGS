@@ -5,10 +5,10 @@ BLUE='\033[0;34m'
 NC='\033[0m'
 
 if [[ "$OSTYPE" == "msys" ]] || [[ "$OSTYPE" == "win32" ]]; then
-    VENV_ACTIVATE="tgs-venv\Scripts\activate"
+    VENV_ACTIVATE="PyTGS-venv\Scripts\activate"
     PYTHON_CMD="python"
 else
-    VENV_ACTIVATE="source tgs-venv/bin/activate"
+    VENV_ACTIVATE="source PyTGS-venv/bin/activate"
     PYTHON_CMD="python3"
 fi
 
@@ -20,12 +20,12 @@ if ! command -v $PYTHON_CMD &> /dev/null; then
 fi
 
 echo -e "${BLUE}Creating virtual environment..${NC}"
-$PYTHON_CMD -m venv tgs-venv
+$PYTHON_CMD -m venv PyTGS-venv
 
 if [[ "$OSTYPE" == "msys" ]] || [[ "$OSTYPE" == "win32" ]]; then
-    . tgs-venv/Scripts/activate
+    . PyTGS-venv/Scripts/activate
 else
-    source tgs-venv/bin/activate
+    source PyTGS-venv/bin/activate
 fi
 
 echo -e "${BLUE}Upgrading pip...${NC}"
@@ -45,9 +45,9 @@ fi
 
 echo -e "${GREEN}Setup complete! To use the tool:${NC}"
 if [[ "$OSTYPE" == "msys" ]] || [[ "$OSTYPE" == "win32" ]]; then
-    echo -e "1. Activate the virtual environment with: ${BLUE}tgs-venv\Scripts\activate${NC}"
+    echo -e "1. Activate the virtual environment with: ${BLUE}PyTGS-venv\Scripts\activate${NC}"
 else
-    echo -e "1. Activate the virtual environment with: ${BLUE}source tgs-venv/bin/activate${NC}"
+    echo -e "1. Activate the virtual environment with: ${BLUE}source PyTGS-venv/bin/activate${NC}"
 fi
 echo -e "2. Edit config.yaml with your data path and desired fitting parameters"
 echo -e "3. Run the analysis with: ${BLUE}python main.py${NC}"

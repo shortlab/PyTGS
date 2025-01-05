@@ -11,8 +11,8 @@ A Python tool for analyzing transient grating spectroscopy (TGS) signals. Proces
 
 1. Clone the repository:
    ```bash
-   git clone https://github.com/auroraaka/pytgs.git
-   cd pytgs
+   git clone https://github.com/shortlab/PyTGS.git
+   cd PyTGS
    ```
 
 2. Run the automated setup script:
@@ -32,11 +32,11 @@ A Python tool for analyzing transient grating spectroscopy (TGS) signals. Proces
 
    **Manual Installation (Windows/Unix/MacOS):**
    ```bash
-   python -m venv tgs-venv
+   python -m venv PyTGS-venv
    # On Windows:
-   tgs-venv\Scripts\activate
+   PyTGS-venv\Scripts\activate
    # On Unix/MacOS:
-   source tgs-venv/bin/activate
+   source PyTGS-venv/bin/activate
    
    pip install --upgrade pip
    pip install -e .  # or pip install -r requirements.txt
@@ -48,12 +48,12 @@ A Python tool for analyzing transient grating spectroscopy (TGS) signals. Proces
    
    **On Unix/MacOS:**
    ```bash
-   source tgs-venv/bin/activate
+   source PyTGS-venv/bin/activate
    ```
    
    **On Windows:**
    ```bash
-   tgs-venv\Scripts\activate
+   PyTGS-venv\Scripts\activate
    ```
 
 2. Edit `config.yaml` with your data path and desired fitting parameters.
