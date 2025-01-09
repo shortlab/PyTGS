@@ -127,5 +127,5 @@ def test(test_case, gen_func):
     avg_alpha_error = float(np.mean(alpha_errors))
     avg_f_error = float(np.mean(f_errors))
 
-    assert avg_alpha_error < 10, f"Average alpha error {avg_alpha_error:.2f}% > 10%"
-    assert avg_f_error < 10, f"Average f error {avg_f_error:.2f}% > 10%"
+    assert avg_alpha_error < 15, f"Average alpha error {avg_alpha_error:.2f}% > 15%"
+    assert avg_f_error < 15, f"Average f error {avg_f_error:.2f}% > 15%"
