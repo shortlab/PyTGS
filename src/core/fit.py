@@ -114,7 +114,10 @@ class TGSAnalyzer:
             json.dump(signals, f)
     
         if show:
-            self.fit_summary(fails)
+            try:
+                self.fit_summary(fails)
+            except Exception as e:
+                self.logger.warning(f"Error generating fit summary: {str(e)}")
 
     def fit_summary(self, fails: List[Tuple[str, int, str]] = None) -> None:
         if not self.paths.fit_path.exists():
