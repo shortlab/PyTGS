@@ -99,7 +99,6 @@ def find_start_time(signal: np.ndarray, grating_spacing: float, time_step: float
         Tuple[int, float]: (start index, start time)
     """
     if null_point < 1 or null_point > 4:
-        print('Null-point start must be between 1 and 4, defaulting to 0 start')
         start_time = signal[0, 0]
 
     if grating_spacing > LARGE_GRATING_THRESHOLD:
@@ -234,7 +233,7 @@ def process_signal(config: dict, paths: Paths, file_idx: int, pos_file: str, neg
         pos[pump_time_idx:end_idx, 1] - neg[pump_time_idx:end_idx, 1] - offset_correction
     ])
 
-    # Determine start point for fitting
+    # Determine fitting start point
     max_idx = np.argmax(signal[TIME_OFFSET_INDEX:, 1]) + TIME_OFFSET_INDEX - 1
     max_time = signal[max_idx, 0]
     start_idx, start_time = find_start_time(signal[max_idx:], grating_spacing, time_step, null_point)

@@ -31,7 +31,17 @@ class TGSAnalyzer:
                             if study in config['study_names']}
 
         if config['idxs'] is not None:
-            self.idxs = [(study, idx) for study in study_signals.keys() for idx in config['idxs'] if idx <= study_signals[study]]
+            self.idxs = []
+            for study in study_signals.keys():
+                for item in config['idxs']:
+                    if isinstance(item, (list, tuple)) and len(item) == 2:
+                        start, end = item
+                        for idx in range(start, end + 1):
+                            if idx <= study_signals[study]:
+                                self.idxs.append((study, idx))
+                    else:
+                        if item <= study_signals[study]:
+                            self.idxs.append((study, item))
         else:
             self.idxs = [(study, idx) 
                          for study, max_idx in study_signals.items() 

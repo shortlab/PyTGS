@@ -24,6 +24,8 @@ def tgs_fit(config: dict, paths: Paths, file_idx: int, pos_file: str, neg_file: 
         pos_file (str): positive signal file path
         neg_file (str): negative signal file path
         grating_spacing (float): grating spacing of TGS probe [µm]
+        signal_proportion (float): proportion of signal to use for fitting (0.0 to 1.0)
+        maxfev (int): maximum number of function evaluations
 
     Returns:
         Tuple containing:
@@ -60,9 +62,11 @@ def tgs_fit(config: dict, paths: Paths, file_idx: int, pos_file: str, neg_file: 
     functional_function, thermal_function = tgs_function(start_time, grating_spacing)
 
     # Thermal fit
-    thermal_p0 = [0.05, 5e-6]
+    thermal_p0 = [0.05, 5e-4]
     popt, _ = curve_fit(lambda x, A, alpha: thermal_function(x, A, 0, 0, alpha, 0, 0, 0, 0), signal[:, 0], signal[:, 1], p0=thermal_p0)
     A, alpha = popt
+    if alpha <= 0:
+        alpha = 1e-6
     
     # Lorentzian fit on FFT of SAW signal
     saw_signal = np.column_stack([
@@ -78,7 +82,7 @@ def tgs_fit(config: dict, paths: Paths, file_idx: int, pos_file: str, neg_file: 
         displacement = q * np.sqrt(alpha / np.pi)
         reflectance = (q ** 2 * alpha + 1 / (2 * max_time))
         beta = displacement / reflectance
-        popt, _ = curve_fit(lambda x, A, alpha: thermal_function(x, A, 0, 0, alpha, beta, 0, 0, 0), signal[start_idx:, 0], signal[start_idx:, 1], p0=thermal_p0)
+        popt, _ = curve_fit(lambda x, A, alpha: thermal_function(x, A, 0, 0, alpha, beta, 0, 0, 0), signal[start_idx:end_idx, 0], signal[start_idx:end_idx, 1], p0=thermal_p0)
         A, alpha = popt
 
     # Functional fit
