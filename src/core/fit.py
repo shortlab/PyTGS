@@ -30,9 +30,9 @@ class TGSAnalyzer:
             study_signals = {study: max_idx 
                             for study, max_idx in study_signals.items() 
                             if study in config['study_names']}
-        
+
         if config['idxs'] is not None:
-            self.idxs = config['idxs']
+            self.idxs = [(study, idx) for study in study_signals.keys() for idx in config['idxs'] if idx <= study_signals[study]]
         else:
             self.idxs = [(study, idx) 
                          for study, max_idx in study_signals.items() 
@@ -86,7 +86,7 @@ class TGSAnalyzer:
             self.idxs = [(study, idx) 
                          for study, max_idx in study_signals.items() 
                          for idx in range(1, max_idx + 1)]
-        
+
         for study_name, i in self.idxs:
             self.logger.info(f"Analyzing {study_name} signal {i}")
             if not (file_prefix := get_file_prefix(self.paths.data_dir, i, study_name)):
