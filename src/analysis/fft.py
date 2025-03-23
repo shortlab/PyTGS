@@ -47,10 +47,16 @@ def fft(saw_signal: np.ndarray, signal_proportion: float = 0.9, use_derivative: 
     fs = num_points / (time[-1] - time[0])
     pad_size = 2 ** 18 - num_points - 2
     pad_time = np.arange(time[-1], time[-1] + pad_size * t_step, t_step)
-    pad = np.full(pad_size, 0)
+    pad_amplitude = np.full(pad_size, 0)
+
+    if len(pad_time) != len(pad_amplitude):
+        min_pad_length = min(len(pad_time), len(pad_amplitude))
+        pad_time = pad_time[:min_pad_length]
+        pad_amplitude = pad_amplitude[:min_pad_length]
+    
     pad_signal = np.vstack((
         np.hstack((time, pad_time)),
-        np.hstack((amplitude, pad))
+        np.hstack((amplitude, pad_amplitude))
     )).T
 
     nfft = len(pad_signal)

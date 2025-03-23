@@ -102,7 +102,9 @@ class TGSAnalyzer:
                 signals.append(signal)
                 fit_data = pd.concat([fit_data, df], ignore_index=True)
             except Exception as e:
-                msg = f"Error fitting signal {i} from study {study_name}: {str(e)}"
+                import traceback
+                error_traceback = traceback.format_exc()
+                msg = f"Error fitting signal {i} from study {study_name}: {str(e)}\nTraceback: {error_traceback}"
                 self.logger.warning(msg)
                 fails.append((study_name, i, msg))
                 continue
