@@ -207,7 +207,7 @@ def process_signal(config: dict, paths: Paths, file_idx: int, pos_file: str, neg
         N = len(pos)
     else:
         raise ValueError('Invalid heterodyne setting, must be "di-homodyne" or "mono-homodyne"')
-    pos, neg = pos[:N], neg[:N]
+    neg, pos = pos[:N], neg[:N]
 
     if baseline_correction is not None and baseline_correction['enabled']:
         pos_baseline = read_data(baseline_correction['pos'])[:N]
