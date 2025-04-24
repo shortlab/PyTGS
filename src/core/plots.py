@@ -35,14 +35,14 @@ def plot_tgs(paths, file_idx, signal, start_idx, functional_function, thermal_fu
     plt.savefig(save_path, dpi=600)
     plt.close()
 
-def plot_fft_lorentzian(paths, file_idx, fft, frequency_bounds, lorentzian_function, popt):
+def plot_fft_lorentzian(paths, file_idx, fft, frequency_bounds, fit_function, popt): 
     frequencies, amplitudes = fft[:, 0], fft[:, 1]
     
     plt.figure(figsize=(10, 6))
     plt.plot(frequencies, amplitudes, linestyle='-', color='black', linewidth=2, label='FFT Signal')
     
     x_smooth = np.linspace(min(frequencies), max(frequencies), 1000)
-    y_fit = lorentzian_function(x_smooth, *popt)
+    y_fit = fit_function(x_smooth, *popt)
     plt.plot(x_smooth, y_fit, linestyle='--', color='red', linewidth=2, label='Lorentzian Fit')
 
     y_range = plt.ylim()
