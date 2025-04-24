@@ -4,11 +4,11 @@ import numpy as np
 from scipy.optimize import curve_fit
 
 from src.core.path import Paths
-from src.analysis.functions import lorentzian_function
+from src.analysis.functions import lorentzian_function, super_lorentzian_function
 from src.core.plots import plot_fft_lorentzian
 
 
-def lorentzian_fit(config: dict, paths: Paths, file_idx: int, fft: np.ndarray, signal_proportion: float = 1.0, frequency_bounds: List[Union[float, float]] = [0.1, 0.9], dc_filter_range: List[Union[int, int]] = [0, 12000], bimodal_fit: bool = False) -> Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray, float]:
+def lorentzian_fit(config: dict, paths: Paths, file_idx: int, fft: np.ndarray, signal_proportion: float = 1.0, frequency_bounds: List[Union[float, float]] = [0.1, 0.9], dc_filter_range: List[Union[int, int]] = [0, 12000], bimodal_fit: bool = False, use_super_lorentzian: bool = True) -> Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray, float]:
     """
     Fit Lorentzian peak to FFT signal.
 
@@ -25,6 +25,7 @@ def lorentzian_fit(config: dict, paths: Paths, file_idx: int, fft: np.ndarray, s
         frequency_range (List[float], optional): [min, max] frequency bounds for fitting [GHz]
         dc_filter_range (List[int], optional): [start, end] indices for DC filtering
         bimodal_fit (bool, optional): whether to perform bimodal peak fitting
+        use_super_lorentzian (bool, optional): whether to use super-Lorentzian for flat-top peaks
 
     Returns:
         Tuple: contains the following elements:
@@ -34,8 +35,8 @@ def lorentzian_fit(config: dict, paths: Paths, file_idx: int, fft: np.ndarray, s
             - tau (np.ndarray): time constant [s]
             - snr (float): signal-to-noise ratio [dB]
             - frequency_bounds (List[float, float]): frequency bounds for fitting [GHz]
-            - lorentzian_function (function): Lorentzian function
-            - popt (np.ndarray): optimized Lorentzian fit parameters
+            - fit_function (function): Fitting function used
+            - popt (np.ndarray): optimized fit parameters
     """
     start, end = dc_filter_range
     fft[:, 0] = fft[:, 0] / 1e9
@@ -59,15 +60,31 @@ def lorentzian_fit(config: dict, paths: Paths, file_idx: int, fft: np.ndarray, s
         neg_idx = start
         pos_idx = len(fft)
 
-    initial_guess = [1e-4, peak_loc, 1e-2, 0]
     min_freq, max_freq = frequency_bounds
-    lower_bounds = [0, min_freq, 1e-3, 0]
-    upper_bounds = [1, max_freq, 0.05, 1]
-    bounds = (lower_bounds, upper_bounds) 
+    
+    if use_super_lorentzian:
+        fit_function = super_lorentzian_function
+        initial_guess = [1e-2, peak_loc, 0.05, 0, 0.5]
+        lower_bounds = [0, min_freq, 1e-3, 0, 0.1]
+        upper_bounds = [1, max_freq, 0.2, 1, 0.9]
+    else:
+        fit_function = lorentzian_function
+        initial_guess = [1e-4, peak_loc, 1e-2, 0]
+        lower_bounds = [0, min_freq, 1e-3, 0]
+        upper_bounds = [1, max_freq, 0.05, 1]
+    
+    bounds = (lower_bounds, upper_bounds)
 
-    popt, pcov = curve_fit(lorentzian_function, fft[neg_idx:pos_idx, 0], fft[neg_idx:pos_idx, 1], p0=initial_guess, bounds=bounds)
-    _, x0, W, _ = popt
-    _, x0_error, _, _ = np.sqrt(np.diag(pcov)) 
+    popt, pcov = curve_fit(fit_function, fft[neg_idx:pos_idx, 0], fft[neg_idx:pos_idx, 1], 
+                          p0=initial_guess, bounds=bounds)
+    
+    if use_super_lorentzian:
+        _, x0, W, _, _ = popt
+        _, x0_error, _, _, _ = np.sqrt(np.diag(pcov))
+    else:
+        _, x0, W, _ = popt
+        _, x0_error, _, _ = np.sqrt(np.diag(pcov))
+    
     saw_frequency = x0 * 1e9
     saw_frequency_error = x0_error * 1e9
     fwhm = 2 * W * 1e9
@@ -77,13 +94,13 @@ def lorentzian_fit(config: dict, paths: Paths, file_idx: int, fft: np.ndarray, s
         bimodal_start = round(0.1 * peak_idx)
         bimodal_end = round(0.75 * peak_idx)
 
-        fft2 = fft[:, 1] - lorentzian_function(fft[:, 0], *popt)
+        fft2 = fft[:, 1] - fit_function(fft[:, 0], *popt)
 
         peak_idx2 = np.argmax(fft2[bimodal_start:bimodal_end]) + bimodal_start
         peak_loc2 = fft[peak_idx2, 0]
 
         initial_guess2 = [1e-4, peak_loc2, 0.01, 0]
-        popt2, pcov2 = curve_fit(lorentzian_function, fft[:, 0], fft2, p0=initial_guess2, bounds=bounds)
+        popt2, pcov2 = curve_fit(fit_function, fft[:, 0], fft2, p0=initial_guess2, bounds=bounds)
         _, x02, W2, _ = popt2
         _, x02_error, _, _ = np.sqrt(np.diag(pcov2))
         saw_frequency2 = x02 * 1e9
@@ -96,12 +113,12 @@ def lorentzian_fit(config: dict, paths: Paths, file_idx: int, fft: np.ndarray, s
         fwhm = np.array([fwhm, fwhm2])
         tau = np.array([tau, tau2])
         
-    fft_noise = np.column_stack((fft[:, 0], fft[:, 1] - lorentzian_function(fft[:, 0], *popt)))
+    fft_noise = np.column_stack((fft[:, 0], fft[:, 1] - fit_function(fft[:, 0], *popt)))
     signal_power = np.mean(fft[:, 1] ** 2)
     noise_power = np.mean(fft_noise[:, 1] ** 2)
     snr = 10 * np.log10(signal_power / noise_power)
 
     if config['plot']['fft_lorentzian']:
-        plot_fft_lorentzian(paths, file_idx, fft[neg_idx:pos_idx], frequency_bounds, lorentzian_function, popt)
+        plot_fft_lorentzian(paths, file_idx, fft[neg_idx:pos_idx], frequency_bounds, fit_function, popt)
 
-    return saw_frequency, saw_frequency_error, fwhm, tau, snr, frequency_bounds, lorentzian_function, popt
+    return saw_frequency, saw_frequency_error, fwhm, tau, snr, frequency_bounds, fit_function, popt

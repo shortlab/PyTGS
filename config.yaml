@@ -1,12 +1,12 @@
 # TOOD
-path: "/Users/akarshaurora/Downloads/Aluminum_Cryo_Irrad/Aluminum_Cryo_Irrad/03-10-2025"  # directory containing input files
-study_names: ['spot00']  # study names to fit (null for all or list of strings e.g. ['spot00', 'spot01'])
-idxs: [10]  # indices of files to fit (null for all, list of indices e.g. [1, 2, 3], or ranges as lists e.g. [[1, 5], 7, [10, 15]])
+path: "example"  # directory containing input files
+study_names: ['cooldown']  # study names to fit (null for all or list of strings e.g. ['spot00', 'spot01'])
+idxs: null  # indices of files to fit (null for all, list of indices e.g. [1, 2, 3], or ranges as lists e.g. [[1, 5], 7, [10, 15]])
 
 # Signal Processing
 signal_process:
   heterodyne: di-homodyne  # detection method: 'di-homodyne' or 'mono-homodyne'
-  null_point: 0  # null point selection (valid range: 1-4)
+  null_point: 1 # null point selection (valid range: 1-4)
   initial_samples: 50  # number of samples to use for initial sample correction, offset correction, and prominence calculation
   baseline_correction:
     enabled: false  # enable/disable baseline correction (if true, pos and neg must be provided)
@@ -15,20 +15,21 @@ signal_process:
 
 # FFT Analysis
 fft:
-  signal_proportion: 0.9  # proportion of signal to analyze (0.0 to 1.0)
+  signal_proportion: 1.0  # proportion of signal to analyze (0.0 to 1.0)
   use_derivative: true  # use signal derivative instead of raw signal
   analysis_type: psd  # analysis method: 'psd' (power spectral density) or 'fft' (fast Fourier transform)
 
 # Lorentzian Fitting
 lorentzian:
   signal_proportion: 1.0  # proportion of signal to use for fitting (0.0 to 1.0)
-  frequency_bounds: [0.0, 1.0]  # frequency range for fitting [GHz]
+  frequency_bounds: [0.1, 0.6]  # frequency range for fitting [GHz]
   dc_filter_range: [0, 12000]  # DC filtering range [Hz]
   bimodal_fit: false  # enable bimodal Lorentzian fitting
+  use_super_lorentzian: true  # enable Super-Lorentzian fitting
 
 # TGS Fitting
 tgs:
-  grating_spacing: 3.5352  # TGS probe grating spacing [µm]
+  grating_spacing: 3.5276  # TGS probe grating spacing [µm]
   signal_proportion: 0.1  # proportion of signal to use for fitting (0.0 to 1.0)
   maxfev: 100000  # Maximum number of iterations for final functional fit
 
