@@ -4,11 +4,11 @@ import numpy as np
 from scipy.optimize import curve_fit
 
 from src.core.path import Paths
-from src.analysis.functions import lorentzian_function, super_lorentzian_function
+from src.analysis.functions import lorentzian_function, skewed_super_lorentzian_function
 from src.core.plots import plot_fft_lorentzian
 
 
-def lorentzian_fit(config: dict, paths: Paths, file_idx: int, fft: np.ndarray, signal_proportion: float = 1.0, frequency_bounds: List[Union[float, float]] = [0.1, 0.9], dc_filter_range: List[Union[int, int]] = [0, 12000], bimodal_fit: bool = False, use_super_lorentzian: bool = True) -> Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray, float]:
+def lorentzian_fit(config: dict, paths: Paths, file_idx: int, fft: np.ndarray, signal_proportion: float = 1.0, frequency_bounds: List[Union[float, float]] = [0.1, 0.9], dc_filter_range: List[Union[int, int]] = [0, 12000], bimodal_fit: bool = False, use_skewed_super_lorentzian: bool = True) -> Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray, float]:
     """
     Fit Lorentzian peak to FFT signal.
 
@@ -26,6 +26,7 @@ def lorentzian_fit(config: dict, paths: Paths, file_idx: int, fft: np.ndarray, s
         dc_filter_range (List[int], optional): [start, end] indices for DC filtering
         bimodal_fit (bool, optional): whether to perform bimodal peak fitting
         use_super_lorentzian (bool, optional): whether to use super-Lorentzian for flat-top peaks
+        use_skewed_lorentzian (bool, optional): whether to use skewed Lorentzian for asymmetric peaks
 
     Returns:
         Tuple: contains the following elements:
@@ -62,11 +63,11 @@ def lorentzian_fit(config: dict, paths: Paths, file_idx: int, fft: np.ndarray, s
 
     min_freq, max_freq = frequency_bounds
     
-    if use_super_lorentzian:
-        fit_function = super_lorentzian_function
-        initial_guess = [1e-2, peak_loc, 0.05, 0, 0.5]
-        lower_bounds = [0, min_freq, 1e-3, 0, 0.1]
-        upper_bounds = [1, max_freq, 0.2, 1, 0.9]
+    if use_skewed_super_lorentzian:
+        fit_function = skewed_super_lorentzian_function
+        initial_guess = [1e-2, peak_loc, 0.05, 0, 0.5, -0.5]
+        lower_bounds = [0, min_freq, 1e-3, 0, 0.1, -2.0]
+        upper_bounds = [1, max_freq, 0.2, 1, 0.9, 2.0]
     else:
         fit_function = lorentzian_function
         initial_guess = [1e-4, peak_loc, 1e-2, 0]
@@ -78,9 +79,9 @@ def lorentzian_fit(config: dict, paths: Paths, file_idx: int, fft: np.ndarray, s
     popt, pcov = curve_fit(fit_function, fft[neg_idx:pos_idx, 0], fft[neg_idx:pos_idx, 1], 
                           p0=initial_guess, bounds=bounds)
     
-    if use_super_lorentzian:
-        _, x0, W, _, _ = popt
-        _, x0_error, _, _, _ = np.sqrt(np.diag(pcov))
+    if use_skewed_super_lorentzian:
+        _, x0, W, _, _, _ = popt
+        _, x0_error, _, _, _, _ = np.sqrt(np.diag(pcov))
     else:
         _, x0, W, _ = popt
         _, x0_error, _, _ = np.sqrt(np.diag(pcov))

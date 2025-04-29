@@ -17,15 +17,15 @@ signal_process:
 fft:
   signal_proportion: 1.0  # proportion of signal to analyze (0.0 to 1.0)
   use_derivative: true  # use signal derivative instead of raw signal
-  analysis_type: psd  # analysis method: 'psd' (power spectral density) or 'fft' (fast Fourier transform)
+  analysis_type: fft  # analysis method: 'psd' (power spectral density) or 'fft' (fast Fourier transform)
 
 # Lorentzian Fitting
 lorentzian:
-  signal_proportion: 1.0  # proportion of signal to use for fitting (0.0 to 1.0)
-  frequency_bounds: [0.1, 0.6]  # frequency range for fitting [GHz]
+  signal_proportion: 0.5  # proportion of signal to use for fitting (0.0 to 1.0)
+  frequency_bounds: [0.08, 0.55]  # frequency range for fitting [GHz]
   dc_filter_range: [0, 12000]  # DC filtering range [Hz]
   bimodal_fit: false  # enable bimodal Lorentzian fitting
-  use_super_lorentzian: true  # enable Super-Lorentzian fitting
+  use_skewed_super_lorentzian: true  # enable Skewed Super-Lorentzian fitting
 
 # TGS Fitting
 tgs:

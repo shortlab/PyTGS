@@ -94,13 +94,10 @@ def lorentzian_function(x: np.ndarray, A: float, x0: float, W: float, C: float) 
     """
     return A / ((x - x0) ** 2 + W ** 2) + C
 
-def super_lorentzian_function(x: np.ndarray, A: float, x0: float, W: float, C: float, n: float) -> np.ndarray:
+def skewed_super_lorentzian_function(x: np.ndarray, A: float, x0: float, W: float, C: float, n: float, alpha: float) -> np.ndarray:
     """
-    Super-Lorentzian function for flat-top peak fitting.
-
-    Equation:
-        L(x) = A / (((x - x0)² + W²)^n) + C
-
+    Skewed super-Lorentzian function for asymmetric peak fitting.
+    
     Parameters:
         x (np.ndarray): frequency array [GHz]
         A (float): amplitude of the peak
@@ -108,8 +105,10 @@ def super_lorentzian_function(x: np.ndarray, A: float, x0: float, W: float, C: f
         W (float): peak width parameter [GHz]
         C (float): vertical offset
         n (float): power parameter (n<1 gives flat tops, n>1 gives sharper peaks)
-
+        alpha (float): skewness parameter (0 = symmetric, >0 = right skew, <0 = left skew)
+        
     Returns:
-        np.ndarray: Super-Lorentzian function values
+        np.ndarray: Skewed super-Lorentzian function values
     """
-    return A / (((x - x0) ** 2 + W ** 2) ** n) + C
+    z = (x - x0) / W
+    return A / (((x - x0) ** 2 + W ** 2) ** n) * (1 + alpha * z) / (1 + alpha**2 * z**2) + C
