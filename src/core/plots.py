@@ -11,7 +11,6 @@ def plot_tgs(paths, file_idx, signal, start_idx, functional_function, thermal_fu
         num_points = len(signal)
     x_raw, y_raw = signal[:num_points, 0], signal[:num_points, 1]
     x_fit = signal[start_idx:num_points, 0]
-
     plt.figure(figsize=(10, 6))
     plt.plot(x_raw * 1e9, y_raw * 1e3, linestyle='-', color='black', linewidth=2, label='Signal')
     plt.plot(x_fit * 1e9, functional_function(x_fit, *fit_params) * 1e3, linestyle='-', color='blue', linewidth=2, label='Functional Fit')
@@ -31,7 +30,7 @@ def plot_tgs(paths, file_idx, signal, start_idx, functional_function, thermal_fu
     
     save_dir = paths.figure_dir / 'tgs'
     save_dir.mkdir(parents=True, exist_ok=True)
-    save_path = save_dir / f'tgs-{file_idx:04d}.png'
+    save_path = save_dir / f'tgs-{file_idx}.png'
     plt.savefig(save_path, dpi=600)
     plt.close()
 
@@ -64,7 +63,7 @@ def plot_fft_lorentzian(paths, file_idx, fft, frequency_bounds, fit_function, po
     
     save_dir = paths.figure_dir / 'fft-lorentzian'
     save_dir.mkdir(parents=True, exist_ok=True)
-    save_path = save_dir / f'fft-lorentzian-{file_idx:04d}.png'
+    save_path = save_dir / f'fft-lorentzian-{file_idx}.png'
     plt.savefig(save_path, dpi=600)
     plt.close()
     
@@ -72,7 +71,7 @@ def plot_signal_process(paths, file_idx, signal, max_time, start_time, num_point
     if num_points is None:
         num_points = len(signal)
     time, amplitude = signal[:num_points, 0], signal[:num_points, 1]
-    
+
     plt.figure(figsize=(10, 6))
     plt.plot(time * 1e9, amplitude * 1e3, linestyle='-', color='black', linewidth=2, label='Signal')
     
@@ -94,7 +93,7 @@ def plot_signal_process(paths, file_idx, signal, max_time, start_time, num_point
     
     save_dir = paths.figure_dir / 'signal-processed'
     save_dir.mkdir(parents=True, exist_ok=True)
-    save_path = save_dir / f'signal-processed-{file_idx:04d}.png'
+    save_path = save_dir / f'signal-processed-{file_idx}.png'
     plt.savefig(save_path, dpi=600)
     plt.close()
 
@@ -155,6 +154,6 @@ def plot_combined(paths, file_idx, signal, max_time, start_time, start_idx, func
     
     save_dir = paths.figure_dir / 'combined'
     save_dir.mkdir(parents=True, exist_ok=True)
-    save_path = save_dir / f'combined-{file_idx:04d}.png'
+    save_path = save_dir / f'combined-{file_idx}.png'
     plt.savefig(save_path, dpi=600, bbox_inches='tight')
     plt.close()

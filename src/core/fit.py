@@ -5,7 +5,7 @@ from pathlib import Path
 
 import pandas as pd
 import numpy as np
-
+import datetime
 from src.analysis.tgs import tgs_fit
 from src.core.utils import get_num_signals, get_file_prefix
 from src.core.path import Paths
@@ -199,6 +199,8 @@ class TGSAnalyzer:
         summary_path = self.paths.fit_dir / 'summary.txt'
         with open(summary_path, 'w') as f:
             f.write(f"Fit Summary\n")
+            f.write(f"{'=' * 80}\n")
+            f.write(datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
             f.write(f"{'=' * 80}\n")
             f.write(f"Total signals attempted: {len(fit_data) + len(fails if fails else [])}\n")
             f.write(f"Successful fits: {len(fit_data)}\n")

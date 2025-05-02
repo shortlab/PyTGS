@@ -1,6 +1,6 @@
 # TOOD
-path: "example"  # directory containing input files
-study_names: ['cooldown']  # study names to fit (null for all or list of strings e.g. ['spot00', 'spot01'])
+path: "/Users/jonasrajagopal/Desktop/ShortUROP/TGS_Data_Analysis/PyTGS/data/WCal_2025-04-28"  # directory containing input files
+study_names: null  # study names to fit (null for all or list of strings e.g. ['spot00', 'spot01'])
 idxs: null  # indices of files to fit (null for all, list of indices e.g. [1, 2, 3], or ranges as lists e.g. [[1, 5], 7, [10, 15]])
 
 # Signal Processing
@@ -9,27 +9,27 @@ signal_process:
   null_point: 1 # null point selection (valid range: 1-4)
   initial_samples: 50  # number of samples to use for initial sample correction, offset correction, and prominence calculation
   baseline_correction:
-    enabled: false  # enable/disable baseline correction (if true, pos and neg must be provided)
-    pos: null  # filename for positive reference
-    neg: null  # filename for negative reference
+    enabled: true  # enable/disable baseline correction (if true, pos and neg must be provided)
+    pos: '/Users/jonasrajagopal/Desktop/ShortUROP/TGS_Data_Analysis/PyTGS/data/WCal_2025-04-28/Tungsten_Calibration-2025-04-28-04.00um-baseline-POS-1.txt'  # filename for positive reference
+    neg: '/Users/jonasrajagopal/Desktop/ShortUROP/TGS_Data_Analysis/PyTGS/data/WCal_2025-04-28/Tungsten_Calibration-2025-04-28-04.00um-baseline-NEG-1.txt'  # filename for negative reference
 
 # FFT Analysis
 fft:
-  signal_proportion: 1.0  # proportion of signal to analyze (0.0 to 1.0)
+  signal_proportion: 0.75 # proportion of signal to analyze (0.0 to 1.0)
   use_derivative: true  # use signal derivative instead of raw signal
-  analysis_type: fft  # analysis method: 'psd' (power spectral density) or 'fft' (fast Fourier transform)
+  analysis_type: psd  # analysis method: 'psd' (power spectral density) or 'fft' (fast Fourier transform)
 
 # Lorentzian Fitting
 lorentzian:
-  signal_proportion: 0.5  # proportion of signal to use for fitting (0.0 to 1.0)
-  frequency_bounds: [0.08, 0.55]  # frequency range for fitting [GHz]
+  signal_proportion: 0.75  # proportion of signal to use for fitting (0.0 to 1.0)
+  frequency_bounds: [0.08, 0.95]  # frequency range for fitting [GHz]
   dc_filter_range: [0, 12000]  # DC filtering range [Hz]
   bimodal_fit: false  # enable bimodal Lorentzian fitting
-  use_skewed_super_lorentzian: true  # enable Skewed Super-Lorentzian fitting
+  use_skewed_super_lorentzian: false  # enable Skewed Super-Lorentzian fitting
 
 # TGS Fitting
 tgs:
-  grating_spacing: 3.5276  # TGS probe grating spacing [µm]
+  grating_spacing: 7.6  # TGS probe grating spacing [µm]
   signal_proportion: 0.1  # proportion of signal to use for fitting (0.0 to 1.0)
   maxfev: 100000  # Maximum number of iterations for final functional fit
 
@@ -40,4 +40,4 @@ plot:
   fft_lorentzian: true  # enable/disable FFT and Lorentzian fit visualization
   tgs: true  # enable/disable TGS fit visualization
   settings:
-    num_points: 400  # number of points to plot (null for all)
+    num_points: 1000  # number of points to plot (null for all)
