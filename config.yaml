@@ -1,5 +1,5 @@
 # TOOD
-path: "/Users/jonasrajagopal/Desktop/ShortUROP/TGS_Data_Analysis/PyTGS/data/WCal_2025-04-28"  # directory containing input files
+path: "data/WCal_2025-04-28"  # directory containing input files
 study_names: null  # study names to fit (null for all or list of strings e.g. ['spot00', 'spot01'])
 idxs: null  # indices of files to fit (null for all, list of indices e.g. [1, 2, 3], or ranges as lists e.g. [[1, 5], 7, [10, 15]])
 
@@ -10,8 +10,8 @@ signal_process:
   initial_samples: 50  # number of samples to use for initial sample correction, offset correction, and prominence calculation
   baseline_correction:
     enabled: true  # enable/disable baseline correction (if true, pos and neg must be provided)
-    pos: '/Users/jonasrajagopal/Desktop/ShortUROP/TGS_Data_Analysis/PyTGS/data/WCal_2025-04-28/Tungsten_Calibration-2025-04-28-04.00um-baseline-POS-1.txt'  # filename for positive reference
-    neg: '/Users/jonasrajagopal/Desktop/ShortUROP/TGS_Data_Analysis/PyTGS/data/WCal_2025-04-28/Tungsten_Calibration-2025-04-28-04.00um-baseline-NEG-1.txt'  # filename for negative reference
+    pos: 'data/WCal_2025-04-28/Tungsten_Calibration-2025-04-28-04.00um-baseline-POS-1.txt'  # filename for positive reference
+    neg: 'data/WCal_2025-04-28/Tungsten_Calibration-2025-04-28-04.00um-baseline-NEG-1.txt'  # filename for negative reference
 
 # FFT Analysis
 fft:
@@ -30,7 +30,7 @@ lorentzian:
 # TGS Fitting
 tgs:
   grating_spacing: 7.6  # TGS probe grating spacing [µm]
-  signal_proportion: 0.1  # proportion of signal to use for fitting (0.0 to 1.0)
+  signal_proportion: 1.0  # proportion of signal to use for fitting (0.0 to 1.0)
   maxfev: 100000  # Maximum number of iterations for final functional fit
 
 # Plotting
