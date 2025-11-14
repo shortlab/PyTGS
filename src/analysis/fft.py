@@ -23,8 +23,7 @@ def fft(saw_signal: np.ndarray, signal_proportion: float = 0.9, use_derivative: 
             - If analysis_type='psd', amplitudes represent power spectral density
             - If analysis_type='fft', amplitudes represent Fourier coefficients
     """
-    N, _ = saw_signal.shape
-    M = int(np.ceil(N)) #int(np.ceil(N * signal_proportion))
+    M, _ = int(np.ceil(saw_signal.shape))
 
     saw_signal = saw_signal[:M]
     saw_signal[:, 1] /= np.max(saw_signal[:, 1])
@@ -67,7 +66,7 @@ def fft(saw_signal: np.ndarray, signal_proportion: float = 0.9, use_derivative: 
         nfft=nfft
     )
 
-    npsd = int(np.ceil(len(power_spectral_density)) - 6 * NOISE_CUTOFF_POINTS #eliminated an 80% chop of the fft signal here to make these codes play well with varied time resolutions.
+    npsd = int(np.ceil(len(power_spectral_density))) #eliminated an 80% chop of the fft signal here to make these codes play well with varied time resolutions.
     power_spectral_density[:NOISE_CUTOFF_POINTS] = 0
     power_spectral_density[npsd:] = 0
     power_spectral_density /= np.max(power_spectral_density)

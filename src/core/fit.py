@@ -96,6 +96,8 @@ class TGSAnalyzer:
                          for study, max_idx in study_signals.items() 
                          for idx in range(1, max_idx + 1)]
 
+        print(f"Fitting indices: {self.idxs}")
+
         for study_name, i in self.idxs:
             self.logger.info(f"Analyzing {study_name} signal {i}")
             if not (file_prefix := get_file_prefix(self.paths.data_dir, i, study_name)):
