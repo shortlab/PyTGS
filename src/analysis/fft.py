@@ -23,7 +23,7 @@ def fft(saw_signal: np.ndarray, signal_proportion: float = 0.9, use_derivative: 
             - If analysis_type='psd', amplitudes represent power spectral density
             - If analysis_type='fft', amplitudes represent Fourier coefficients
     """
-    M, _ = int(np.ceil(saw_signal.shape))
+    M, _ = saw_signal.shape
     M = int(np.ceil(M)) #int(np.ceil(N * signal_proportion))
 
     saw_signal = saw_signal[:M]
