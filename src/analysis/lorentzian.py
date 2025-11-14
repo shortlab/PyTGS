@@ -7,7 +7,6 @@ from src.core.path import Paths
 from src.analysis.functions import lorentzian_function, skewed_super_lorentzian_function
 from src.core.plots import plot_fft_lorentzian
 
-
 def lorentzian_fit(config: dict, paths: Paths, file_idx: int, fft: np.ndarray, signal_proportion: float = 1.0, frequency_bounds: List[Union[float, float]] = [0.1, 0.9], dc_filter_range: List[Union[int, int]] = [0, 12000], bimodal_fit: bool = False, use_skewed_super_lorentzian: bool = True) -> Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray, float]:
     """
     Fit Lorentzian peak to FFT signal.
@@ -39,9 +38,9 @@ def lorentzian_fit(config: dict, paths: Paths, file_idx: int, fft: np.ndarray, s
             - fit_function (function): Fitting function used
             - popt (np.ndarray): optimized fit parameters
     """
-    start, end = dc_filter_range
-    fft[:, 0] = fft[:, 0] / 1e9
-    fft[:start, 1] = 0
+    start, end = dc_filter_range # Hamamatsu C5658 range bottoms at 50 kHz and the fft produces a peak under 50 kHz which is not physical
+    fft[:, 0] = fft[:, 0] / 1e9  # Hz to GHz
+    fft[:start, 1] = 0           
 
     max_value = np.max(fft[start:, 1])
     peak_idx = np.argmax(fft[start:, 1]) 
@@ -62,15 +61,16 @@ def lorentzian_fit(config: dict, paths: Paths, file_idx: int, fft: np.ndarray, s
         pos_idx = len(fft)
 
     min_freq, max_freq = frequency_bounds
+    peak_loc_clipped = np.clip(peak_loc, min_freq, max_freq)
     
     if use_skewed_super_lorentzian:
         fit_function = skewed_super_lorentzian_function
-        initial_guess = [1e-2, peak_loc, 0.05, 0, 0.5, -0.5]
+        initial_guess = [1e-2, peak_loc_clipped, 0.05, 0, 0.5, -0.5]
         lower_bounds = [0, min_freq, 1e-3, 0, 0.1, -2.0]
         upper_bounds = [1, max_freq, 0.2, 1, 0.9, 2.0]
     else:
         fit_function = lorentzian_function
-        initial_guess = [1e-4, peak_loc, 1e-2, 0]
+        initial_guess = [1e-4, peak_loc_clipped, 1e-2, 0]
         lower_bounds = [0, min_freq, 1e-3, 0]
         upper_bounds = [1, max_freq, 0.05, 1]
     

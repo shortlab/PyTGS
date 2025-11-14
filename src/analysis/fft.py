@@ -24,7 +24,7 @@ def fft(saw_signal: np.ndarray, signal_proportion: float = 0.9, use_derivative: 
             - If analysis_type='fft', amplitudes represent Fourier coefficients
     """
     N, _ = saw_signal.shape
-    M = int(np.ceil(N * signal_proportion))
+    M = int(np.ceil(N)) #int(np.ceil(N * signal_proportion))
 
     saw_signal = saw_signal[:M]
     saw_signal[:, 1] /= np.max(saw_signal[:, 1])

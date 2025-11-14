@@ -10,7 +10,7 @@ from src.analysis.lorentzian import lorentzian_fit
 from src.analysis.functions import tgs_function
 from src.core.plots import plot_tgs, plot_combined
 
-def tgs_fit(config: dict, paths: Paths, file_idx: int, pos_file: str, neg_file: str, grating_spacing: float, signal_proportion: float= 0.9, maxfev: float= 100000) -> Tuple[Union[float, np.ndarray]]:
+def tgs_fit(config: dict, paths: Paths, file_idx: int, pos_file: str, neg_file: str, grating_spacing: float, signal_proportion: float= 0.9, maxfev: float= 1000000) -> Tuple[Union[float, np.ndarray]]:
     """
     Fit transient grating spectroscopy (TGS) response equation to experimentally collected signal.
 

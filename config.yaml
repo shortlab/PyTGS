@@ -1,43 +1,43 @@
 # TOOD
-path: "example"  # directory containing input files
-study_names: ['cooldown']  # study names to fit (null for all or list of strings e.g. ['spot00', 'spot01'])
-idxs: null  # indices of files to fit (null for all, list of indices e.g. [1, 2, 3], or ranges as lists e.g. [[1, 5], 7, [10, 15]])
+path: "example"                         # directory containing input files
+study_names: ['cooldown']               # study names to fit (null for all or list of strings e.g. ['spot00', 'spot01'])
+idxs: null                              # indices of files to fit (null for all, list of indices e.g. [1, 2, 3], or ranges as lists e.g. [[1, 5], 7, [10, 15]])
 
 # Signal Processing
 signal_process:
-  heterodyne: di-homodyne  # detection method: 'di-homodyne' or 'mono-homodyne'
-  null_point: 2 # null point selection (valid range: 1-4)
-  initial_samples: 50  # number of samples to use for initial sample correction, offset correction, and prominence calculation
+  heterodyne: di-homodyne               # detection method: 'di-homodyne' or 'mono-homodyne'
+  null_point: 2                         # null point selection (valid range: 1-4)
+  initial_samples: 50                   # number of samples to use for initial sample correction, offset correction, and prominence calculation
   baseline_correction:
-    enabled: false  # enable/disable baseline correction (if true, pos and neg must be provided)
-    pos: null  # filename for positive reference
-    neg: null  # filename for negative reference
+    enabled: false                      # enable/disable baseline correction (if true, pos and neg must be provided)
+    pos: null                           # filename for positive reference
+    neg: null                           # filename for negative reference
 
 # FFT Analysis
 fft:
-  signal_proportion: 1.0  # proportion of signal to analyze (0.0 to 1.0)
-  use_derivative: true  # use signal derivative instead of raw signal
-  analysis_type: fft  # analysis method: 'psd' (power spectral density) or 'fft' (fast Fourier transform)
+  signal_proportion: 1.0                # proportion of signal to analyze (0.0 to 1.0)
+  use_derivative: true                  # use signal derivative instead of raw signal
+  analysis_type: fft                    # analysis method: 'psd' (power spectral density) or 'fft' (fast Fourier transform)
 
 # Lorentzian Fitting
 lorentzian:
-  signal_proportion: 1  # proportion of signal to use for fitting (0.0 to 1.0)
-  frequency_bounds: [0.1, 0.9]  # frequency range for fitting [GHz]
-  dc_filter_range: [0, 12000]  # DC filtering range [Hz]
-  bimodal_fit: false  # enable bimodal Lorentzian fitting
-  use_skewed_super_lorentzian: false  # enable Skewed Super-Lorentzian fitting
+  signal_proportion: 1                  # proportion of signal to use for fitting (0.0 to 1.0)
+  frequency_bounds: [0.1, 0.9]          # frequency range for fitting [GHz] (Lower bound is for air, upper bound is not stictly necessary but the detector tops off a  1 GHz)
+  dc_filter_range: [0, 50000]           # DC filtering range [Hz]
+  bimodal_fit: false                    # enable bimodal Lorentzian fitting
+  use_skewed_super_lorentzian: false    # enable Skewed Super-Lorentzian fitting
 
 # TGS Fitting
 tgs:
-  grating_spacing: 3.5276  # TGS probe grating spacing [µm]
-  signal_proportion: 1  # proportion of signal to use for fitting (0.0 to 1.0)
-  maxfev: 100000  # Maximum number of iterations for final functional fit
+  grating_spacing: 3.5276               # TGS probe grating spacing [µm]
+  signal_proportion: 1                  # proportion of signal to use for fitting (0.0 to 1.0)
+  maxfev: 1000000                        # Maximum number of iterations for final functional fit
 
 # Plotting
 plot:
   # if all plots are true, the combined plot will be visualized
-  signal_process: true  # enable/disable processed signal visualization
-  fft_lorentzian: true  # enable/disable FFT and Lorentzian fit visualization
-  tgs: true  # enable/disable TGS fit visualization
+  signal_process: true                  # enable/disable processed signal visualization
+  fft_lorentzian: true                  # enable/disable FFT and Lorentzian fit visualization
+  tgs: true                             # enable/disable TGS fit visualization
   settings:
-    num_points: null  # number of points to plot (null for all)
+    num_points: null                    # number of points to plot (null for all)
