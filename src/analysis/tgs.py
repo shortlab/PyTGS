@@ -56,6 +56,11 @@ def tgs_fit(config: dict, paths: Paths, file_idx: int, pos_file: str, neg_file: 
             3. Iterative beta fitting
             4. Functional fit including thermal and acoustic components
     """
+    #  Isolate the name for each signal for labelling
+    ID1 = str(pos_file).rsplit("/")
+    ID2 = ID1[-1].rsplit("\\") #deals with both filepath conventions
+    file_id = ID2[-1].split(".txt")[0]
+    
     # Process signal and build fit functions
     signal, max_time, start_time, start_idx = process_signal(config, paths, file_idx, pos_file, neg_file, grating_spacing, **config['signal_process'])
     end_idx = int(len(signal) * signal_proportion) + start_idx
@@ -92,10 +97,10 @@ def tgs_fit(config: dict, paths: Paths, file_idx: int, pos_file: str, neg_file: 
     A_err, B_err, C_err, alpha_err, beta_err, theta_err, tau_err, f_err = np.sqrt(np.diag(tgs_pcov))
 
     if config['plot']['tgs']:
-        plot_tgs(paths, file_idx, signal, start_idx, functional_function, thermal_function, tgs_popt, config['plot']['settings']['num_points'])
+        plot_tgs(paths, file_id, signal, start_idx, functional_function, thermal_function, tgs_popt, config['plot']['settings']['num_points'])
 
     if config['plot']['signal_process'] and config['plot']['fft_lorentzian'] and config['plot']['tgs']:
-        plot_combined(paths, file_idx, signal, max_time, start_time, start_idx, functional_function, thermal_function, tgs_popt,
+        plot_combined(paths, file_id, signal, max_time, start_time, start_idx, functional_function, thermal_function, tgs_popt,
                      fft_signal, frequency_bounds, lorentzian_function, lorentzian_popt, config['plot']['settings']['num_points'])
 
     return start_idx, start_time, grating_spacing, A, A_err, B, B_err, C, C_err, alpha, alpha_err, beta, beta_err, theta, theta_err, tau, tau_err, f, f_err, signal
