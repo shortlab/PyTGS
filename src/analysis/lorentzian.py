@@ -7,7 +7,7 @@ from src.core.path import Paths
 from src.analysis.functions import lorentzian_function, skewed_super_lorentzian_function
 from src.core.plots import plot_fft_lorentzian
 
-def lorentzian_fit(config: dict, paths: Paths, file_idx: int, fft: np.ndarray, signal_proportion: float = 1.0, frequency_bounds: List[Union[float, float]] = [0.1, 0.9], dc_filter_range: List[Union[int, int]] = [0, 12000], bimodal_fit: bool = False, use_skewed_super_lorentzian: bool = True) -> Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray, float]:
+def lorentzian_fit(config: dict, paths: Paths, file_id: int, fft: np.ndarray, signal_proportion: float = 1.0, frequency_bounds: List[Union[float, float]] = [0.1, 0.9], dc_filter_range: List[Union[int, int]] = [0, 12000], bimodal_fit: bool = False, use_skewed_super_lorentzian: bool = True) -> Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray, float]:
     """
     Fit Lorentzian peak to FFT signal.
 
@@ -18,7 +18,7 @@ def lorentzian_fit(config: dict, paths: Paths, file_idx: int, fft: np.ndarray, s
     Parameters:
         config (dict): configuration dictionary
         paths (Paths): paths to data, figures, and fit files
-        file_idx (int): file index
+        file_id (int): filename snippet
         fft (np.ndarray): FFT signal array of shape (N, 2) containing frequency and amplitude
         signal_proportion (float, optional): proportion of signal to include in fit
         frequency_range (List[float], optional): [min, max] frequency bounds for fitting [GHz]
@@ -120,6 +120,6 @@ def lorentzian_fit(config: dict, paths: Paths, file_idx: int, fft: np.ndarray, s
     snr = 10 * np.log10(signal_power / noise_power)
 
     if config['plot']['fft_lorentzian']:
-        plot_fft_lorentzian(paths, file_idx, fft[neg_idx:pos_idx], frequency_bounds, fit_function, popt)
+        plot_fft_lorentzian(paths, file_id, fft[neg_idx:pos_idx], frequency_bounds, fit_function, popt)
 
     return saw_frequency, saw_frequency_error, fwhm, tau, snr, frequency_bounds, fit_function, popt
