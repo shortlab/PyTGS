@@ -94,7 +94,7 @@ def plot_signal_process(paths, file_id, signal, max_time, start_time, num_points
     
     save_dir = paths.figure_dir / 'signal-processed'
     save_dir.mkdir(parents=True, exist_ok=True)
-    save_path = save_dir / f'signal-processed-{file_idx}.png'
+    save_path = save_dir / f'signal-processed-{file_id}.png'
     plt.savefig(save_path, dpi=600)
     plt.close()
 
