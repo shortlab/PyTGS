@@ -35,7 +35,7 @@ def get_num_signals(path: Path) -> dict[str, int]:
     Returns:
         dict[str, int]: dictionary mapping study names to their maximum signal index
     """
-    pattern = re.compile(r'.*-(\w+)-((?:POS|NEG)-\d+)\.txt$')
+    pattern = re.compile(r'.*-([\w.]+)-((?:POS|NEG)-\d+)\.txt$')
     
     study_indices = {}
     for filename in path.iterdir():
