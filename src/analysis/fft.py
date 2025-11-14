@@ -67,7 +67,7 @@ def fft(saw_signal: np.ndarray, signal_proportion: float = 0.9, use_derivative: 
         nfft=nfft
     )
 
-    npsd = int(np.ceil(len(power_spectral_density) * 0.2)) - 6 * NOISE_CUTOFF_POINTS
+    npsd = int(np.ceil(len(power_spectral_density)) - 6 * NOISE_CUTOFF_POINTS #eliminated an 80% chop of the fft signal here to make these codes play well with varied time resolutions.
     power_spectral_density[:NOISE_CUTOFF_POINTS] = 0
     power_spectral_density[npsd:] = 0
     power_spectral_density /= np.max(power_spectral_density)
