@@ -40,9 +40,7 @@ def lorentzian_fit(config: dict, paths: Paths, file_id: int, fft: np.ndarray, si
     """
     start, end = dc_filter_range # Hamamatsu C5658 range bottoms at 50 kHz and the fft produces a peak under 50 kHz which is not physical
     fft[:, 0] = fft[:, 0] / 1e9  # Hz to GHz
-    fft[:start, 1] = 0           
-
-    print('poop!')
+    fft[:start, 1] = 0
     
     max_value = np.max(fft[start:, 1])
     peak_idx = np.argmax(fft[start:, 1]) 
