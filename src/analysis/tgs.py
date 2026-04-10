@@ -24,7 +24,7 @@ def tgs_fit(config: dict, paths: Paths, file_idx: int, pos_file: str, neg_file: 
         pos_file (str): positive signal file path
         neg_file (str): negative signal file path
         grating_spacing (float): grating spacing of TGS probe [µm]
-        signal_proportion (float): proportion of signal to use for fitting (0.0 to 1.0)
+        signal_proportion (float): portion of signal to use for fitting (0.0 to 1.0)
         maxfev (int): maximum number of function evaluations
 
     Returns:

@@ -233,7 +233,6 @@ def process_signal(config: dict, paths: Paths, file_idx: int, pos_file: str, neg
         pos[pump_time_idx:end_idx, 1] - neg[pump_time_idx:end_idx, 1] - offset_correction
     ])
 
-    # Determine fitting start point
     max_idx = np.argmax(signal[TIME_OFFSET_INDEX:, 1]) + TIME_OFFSET_INDEX - 1
     max_time = signal[max_idx, 0]
     start_idx, start_time = find_start_time(signal[max_idx:], grating_spacing, time_step, null_point)

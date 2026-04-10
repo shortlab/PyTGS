@@ -7,25 +7,23 @@ from src.core.path import Paths
 from src.analysis.functions import lorentzian_function, skewed_super_lorentzian_function
 from src.core.plots import plot_fft_lorentzian
 
-def lorentzian_fit(config: dict, paths: Paths, file_id: int, fft: np.ndarray, signal_proportion: float = 1.0, frequency_bounds: List[Union[float, float]] = [0.1, 0.9], dc_filter_range: List[Union[int, int]] = [0, 12000], bimodal_fit: bool = False, use_skewed_super_lorentzian: bool = True) -> Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray, float]:
+def lorentzian_fit(config: dict, paths: Paths, file_id: int, fft: np.ndarray, signal_proportion: float = 1.0, frequency_bounds: List[Union[float, float]] = [0.1, 0.9], bimodal_fit: bool = False, use_skewed_super_lorentzian: bool = True) -> Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray, float]:
     """
     Fit Lorentzian peak to FFT signal.
 
     This function performs either single or bimodal Lorentzian peak fitting on FFT data.
-    It includes DC filtering, signal normalization, and optional partial signal fitting
-    based on a proportion of the peak height.
+    It uses frequency_bounds to select the fitting region, filtering out low-frequency
+    artifacts and constraining the peak search.
 
     Parameters:
         config (dict): configuration dictionary
         paths (Paths): paths to data, figures, and fit files
         file_id (int): filename snippet
         fft (np.ndarray): FFT signal array of shape (N, 2) containing frequency and amplitude
-        signal_proportion (float, optional): proportion of signal to include in fit
-        frequency_range (List[float], optional): [min, max] frequency bounds for fitting [GHz]
-        dc_filter_range (List[int], optional): [start, end] indices for DC filtering
+        signal_proportion (float, optional): portion of signal to include in fit
+        frequency_bounds (List[float], optional): [min, max] frequency bounds for fitting [GHz]
         bimodal_fit (bool, optional): whether to perform bimodal peak fitting
-        use_super_lorentzian (bool, optional): whether to use super-Lorentzian for flat-top peaks
-        use_skewed_lorentzian (bool, optional): whether to use skewed Lorentzian for asymmetric peaks
+        use_skewed_super_lorentzian (bool, optional): whether to use skewed super-Lorentzian for asymmetric peaks
 
     Returns:
         Tuple: contains the following elements:
@@ -38,39 +36,39 @@ def lorentzian_fit(config: dict, paths: Paths, file_id: int, fft: np.ndarray, si
             - fit_function (function): Fitting function used
             - popt (np.ndarray): optimized fit parameters
     """
-    start, end = dc_filter_range # Hamamatsu C5658 range bottoms at 50 kHz and the fft produces a peak under 50 kHz which is not physical
     fft[:, 0] = fft[:, 0] / 1e9  # Hz to GHz
-    fft[:start, 1] = 0
-    
-    max_value = np.max(fft[start:, 1])
-    peak_idx = np.argmax(fft[start:, 1]) 
+
+    min_freq, max_freq = frequency_bounds
+    bound_indices = np.where((fft[:, 0] >= min_freq) & (fft[:, 0] <= max_freq))[0]
+    bound_start = bound_indices[0]
+    bound_end = bound_indices[-1] + 1
+
+    max_value = np.max(fft[bound_start:bound_end, 1])
+    peak_idx = bound_start + np.argmax(fft[bound_start:bound_end, 1])
     peak_loc = fft[peak_idx, 0]
 
     fft[:, 1] /= max_value
 
     if signal_proportion != 1.0:
-        threshold = signal_proportion * fft[peak_idx + start, 1]
-        neg_idx = peak_idx + start
-        while neg_idx > start and fft[neg_idx, 1] > threshold:
+        threshold = signal_proportion * fft[peak_idx, 1]
+        neg_idx = peak_idx
+        while neg_idx > bound_start and fft[neg_idx, 1] > threshold:
             neg_idx -= 1
-        pos_idx = peak_idx + start
-        while pos_idx < len(fft) and fft[pos_idx, 1] > threshold:
+        pos_idx = peak_idx
+        while pos_idx < bound_end and fft[pos_idx, 1] > threshold:
             pos_idx += 1
     else:
-        neg_idx = start
-        pos_idx = len(fft)
-
-    min_freq, max_freq = frequency_bounds
-    peak_loc_clipped = np.clip(peak_loc, min_freq, max_freq)
+        neg_idx = bound_start
+        pos_idx = bound_end
     
     if use_skewed_super_lorentzian:
         fit_function = skewed_super_lorentzian_function
-        initial_guess = [1e-2, peak_loc_clipped, 0.05, 0, 0.5, -0.5]
+        initial_guess = [1e-2, peak_loc, 0.05, 0, 0.5, -0.5]
         lower_bounds = [0, min_freq, 1e-3, 0, 0.1, -2.0]
         upper_bounds = [1, max_freq, 0.2, 1, 0.9, 2.0]
     else:
         fit_function = lorentzian_function
-        initial_guess = [1e-4, peak_loc_clipped, 1e-2, 0]
+        initial_guess = [1e-4, peak_loc, 1e-2, 0]
         lower_bounds = [0, min_freq, 1e-3, 0]
         upper_bounds = [1, max_freq, 0.05, 1]
     
