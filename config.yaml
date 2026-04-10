@@ -15,22 +15,20 @@ signal_process:
 
 # FFT Analysis
 fft:
-  signal_proportion: 1.0                # proportion of signal to analyze (0.0 to 1.0)
-  use_derivative: true                  # use signal derivative instead of raw signal
+  signal_proportion: 1.0                # portion of signal to analyze (0.0 to 1.0)
   analysis_type: fft                    # analysis method: 'psd' (power spectral density) or 'fft' (fast Fourier transform)
 
 # Lorentzian Fitting
 lorentzian:
-  signal_proportion: 1                  # proportion of signal to use for fitting (0.0 to 1.0)
-  frequency_bounds: [0.1, 0.9]          # frequency range for fitting [GHz] (Lower bound is for air, upper bound is not stictly necessary but the detector tops off a  1 GHz)
-  dc_filter_range: [0, 50000]           # DC filtering range [Hz]
+  signal_proportion: 1                  # portion of signal to use for fitting (0.0 to 1.0)
+  frequency_bounds: [0.1, 0.9]          # frequency range for fitting [GHz]
   bimodal_fit: false                    # enable bimodal Lorentzian fitting
   use_skewed_super_lorentzian: false    # enable Skewed Super-Lorentzian fitting
 
 # TGS Fitting
 tgs:
   grating_spacing: 3.5276               # TGS probe grating spacing [µm]
-  signal_proportion: 1                  # proportion of signal to use for fitting (0.0 to 1.0)
+  signal_proportion: 1                  # portion of signal to use for fitting (0.0 to 1.0)
   maxfev: 1000000                        # Maximum number of iterations for final functional fit
 
 # Plotting
