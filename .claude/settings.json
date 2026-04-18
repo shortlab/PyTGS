@@ -1,0 +1,14 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash",
+      "Edit",
+      "Read",
+      "Write",
+      "WebFetch",
+      "WebSearch",
+      "Skill"
+    ]
+  },
+  "enableAllProjectMcpServers": true
+}

@@ -79,7 +79,7 @@ def tgs_fit(config: dict, paths: Paths, file_idx: int, pos_file: str, neg_file: 
         signal[:, 1] - thermal_function(signal[:, 0], A, 0, 0, alpha, 0, 0, 0, 0)
     ])
     fft_signal = fft(saw_signal, **config['fft'])
-    f, _, _, tau, _, frequency_bounds, lorentzian_function, lorentzian_popt = lorentzian_fit(config, paths, file_idx, fft_signal, **config['lorentzian'])
+    f, f_err, fwhm, tau, snr, frequency_bounds, lorentzian_function, lorentzian_popt, fft_segment, fft_full, lorentzian_curve = lorentzian_fit(config, paths, file_idx, fft_signal, **config['lorentzian'])
 
     # Iteratively fit beta (displacement-reflectance ratio)
     q = 2 * np.pi / (grating_spacing * 1e-6)
@@ -103,4 +103,4 @@ def tgs_fit(config: dict, paths: Paths, file_idx: int, pos_file: str, neg_file: 
         plot_combined(paths, file_id, signal, max_time, start_time, start_idx, functional_function, thermal_function, tgs_popt,
                      fft_signal, frequency_bounds, lorentzian_function, lorentzian_popt, config['plot']['settings']['num_points'])
 
-    return start_idx, start_time, grating_spacing, A, A_err, B, B_err, C, C_err, alpha, alpha_err, beta, beta_err, theta, theta_err, tau, tau_err, f, f_err, signal
+    return start_idx, start_time, grating_spacing, A, A_err, B, B_err, C, C_err, alpha, alpha_err, beta, beta_err, theta, theta_err, tau, tau_err, f, f_err, signal, fft_full, lorentzian_curve
