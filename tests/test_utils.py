@@ -7,8 +7,8 @@ import yaml
 
 from src.analysis.functions import tgs_function
 
-def generate_signal(params, time_range=(1e-12, 2e-7), num_points=4000, noise_level=0.05, sign='POS'):
-    np.random.seed(int(datetime.now().timestamp() * 1e6) % (2**32 - 1))
+def generate_signal(params, time_range=(1e-12, 2e-7), num_points=4000, noise_level=0.05, sign='POS', seed=None):
+    rng = np.random.default_rng(seed)
 
     t = np.linspace(time_range[0], time_range[1], num_points)
     functional_fit, _ = tgs_function(start_time=2e-9, grating_spacing=params["grating_spacing"])
@@ -23,7 +23,7 @@ def generate_signal(params, time_range=(1e-12, 2e-7), num_points=4000, noise_lev
         params["tau"],
         params["f"],
     )
-    noise = np.random.normal(0, noise_level * np.std(signal), num_points)
+    noise = rng.normal(0, noise_level * np.std(signal), num_points)
     noisy_signal = signal + noise
     if sign == 'NEG':
         noisy_signal = -noisy_signal

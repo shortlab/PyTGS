@@ -1,5 +1,6 @@
 import json
 import logging
+import re
 from typing import Any, List, Tuple
 from pathlib import Path
 
@@ -9,6 +10,8 @@ import numpy as np
 from src.analysis.tgs import tgs_fit
 from src.core.utils import get_num_signals, get_file_prefix
 from src.core.path import Paths
+
+_PARAM_COLUMN_RE = re.compile(r'^([A-Za-z_]+)\[(.+)\]$')
 
 class TGSAnalyzer:
     def __init__(self, config: dict[str, Any]) -> None:
@@ -54,12 +57,15 @@ class TGSAnalyzer:
             handler.setFormatter(logging.Formatter('%(message)s'))
             self.logger.addHandler(handler)
 
-    def fit_signal(self, file_idx: int, pos_file: str, neg_file: str) -> Tuple[pd.DataFrame, List[List[float]], List[List[float]]]:
-        (start_idx, start_time, grating_spacing, 
-         A, A_err, B, B_err, C, C_err, 
-         alpha, alpha_err, beta, beta_err, 
-         theta, theta_err, tau, tau_err, 
-         f, f_err, signal) = tgs_fit(self.config, self.paths, file_idx, pos_file, neg_file, **self.config['tgs'])
+    def fit_signal(self, file_idx: int, pos_file: str, neg_file: str) -> Tuple[pd.DataFrame, List[List[float]]]:
+        (start_idx, start_time, grating_spacing,
+         A, A_err, B, B_err, C, C_err,
+         alpha, alpha_err, beta, beta_err,
+         theta, theta_err, tau, tau_err,
+         f, f_err, signal,
+         _fft_full, _lorentzian_curve) = tgs_fit(
+            self.config, self.paths, file_idx, pos_file, neg_file, **self.config['tgs']
+        )
 
         params = {
             'A': (A, A_err, 'Wm^-2'),
@@ -137,35 +143,50 @@ class TGSAnalyzer:
             return
 
         fit_data = pd.read_csv(self.paths.fit_path)
-        param_cols = [col for col in fit_data.columns 
-                     if any(param in col for param in ['A[', 'B[', 'C[', 'alpha[', 'beta[', 'theta[', 'tau[', 'f['])
-                     and not 'err' in col]
-        
+        param_prefixes = ('A', 'B', 'C', 'alpha', 'beta', 'theta', 'tau', 'f')
+        param_cols = [
+            col for col in fit_data.columns
+            if any(col.startswith(f'{p}[') for p in param_prefixes)
+        ]
+
         summary = []
         for param in param_cols:
             try:
-                values = fit_data[param].values
-                param_base = param.split('[')[0]
-                unit = param.split('[')[1]
-                error_col = f"{param_base}_err[{unit}"
-                errors = fit_data[error_col].values
-                
-                weights = 1 / (errors ** 2)
-                if np.all(weights == 0) or np.any(~np.isfinite(weights)):
-                    self.logger.warning(f"Warning: Invalid weights for parameter {param}. Using unweighted statistics.")
-                    weighted_mean = np.mean(values)
-                    weighted_std = np.std(values)
+                match = _PARAM_COLUMN_RE.match(param)
+                if not match:
+                    continue
+                param_base, unit = match.group(1), match.group(2)
+                error_col = f"{param_base}_err[{unit}]"
+                if error_col not in fit_data.columns:
+                    continue
+
+                values = fit_data[param].to_numpy(dtype=float)
+                errors = fit_data[error_col].to_numpy(dtype=float)
+
+                usable = np.isfinite(errors) & (errors > 0) & np.isfinite(values)
+                if usable.any():
+                    weights = 1.0 / errors[usable] ** 2
+                    weighted_mean = float(np.average(values[usable], weights=weights))
+                    weighted_var = float(np.average((values[usable] - weighted_mean) ** 2, weights=weights))
+                    weighted_std = float(np.sqrt(weighted_var))
                 else:
-                    weighted_mean = np.average(values, weights=weights)
-                    weighted_std = np.sqrt(np.average((values - weighted_mean) ** 2, weights=weights))
-                
+                    self.logger.warning(f"Warning: no usable error bars for parameter {param}. Using unweighted statistics.")
+                    weighted_mean = float(np.mean(values))
+                    weighted_std = float(np.std(values))
+
+                nonzero = usable & (np.abs(values) > 0)
+                if nonzero.any():
+                    relative_error = float(np.mean(errors[nonzero] / np.abs(values[nonzero])) * 100)
+                else:
+                    relative_error = float('inf')
+
                 summary.append({
                     'Parameter': param,
                     'Mean': weighted_mean,
                     'Std': weighted_std,
-                    'Min': np.min(values),
-                    'Max': np.max(values),
-                    'Relative Error (%)': np.mean(errors / np.abs(values)) * 100 if np.any(values != 0) else np.inf
+                    'Min': float(np.min(values)),
+                    'Max': float(np.max(values)),
+                    'Relative Error (%)': relative_error,
                 })
             except Exception as e:
                 self.logger.warning(f"Error processing parameter {param}: {str(e)}")
@@ -178,6 +199,19 @@ class TGSAnalyzer:
                     'Relative Error (%)': np.nan
                 })
         
+        if not summary:
+            self.logger.info("\nFit Summary:")
+            self.logger.info("-" * 80)
+            self.logger.info(f"Total signals attempted: {len(fit_data) + len(fails if fails else [])}")
+            self.logger.info(f"Successful fits: 0")
+            self.logger.info(f"Failed fits: {len(fails) if fails else 0}")
+            if fails:
+                self.logger.info("\nFailed Fits:")
+                for study, idx, error in fails:
+                    self.logger.info(f"- Study: {study}, Signal: {idx}")
+                    self.logger.info(f"  Error: {error}")
+            return
+
         summary_df = pd.DataFrame(summary)
         summary_df = summary_df.set_index('Parameter')
         

@@ -3,27 +3,35 @@ from pathlib import Path
 
 import numpy as np
 
-def read_data(file_path: str, header_length: int = 15) -> np.ndarray:
+def read_data(file_path: str) -> np.ndarray:
     """
-    Read TGS signal data file and return time and amplitude data casted as a numpy array.
+    Read a TGS signal data file and return [time, amplitude] as a numpy array.
 
     Parameters:
         file_path (str): path to the TGS data file
-        header_length (int): number of lines to skip in the header
     Returns:
         np.ndarray: array of shape (N, 2) containing [time, amplitude]
     """
     time_data = []
     amplitude_data = []
     with open(file_path, 'r') as file:
-        for _ in range(header_length):
-            next(file)
-        next(file)
         for line in file:
-            time, amplitude = map(float, line.strip().split('\t'))
-            time_data.append(time)
-            amplitude_data.append(amplitude)
-    
+            if line.strip().lower().startswith('time') and 'amplitude' in line.lower():
+                break
+        for line in file:
+            parts = line.split()
+            if len(parts) < 2:
+                continue
+            try:
+                t, a = float(parts[0]), float(parts[1])
+            except ValueError:
+                continue
+            time_data.append(t)
+            amplitude_data.append(a)
+
+    if not time_data:
+        raise ValueError(f"No numeric samples found in {file_path}")
+
     return np.column_stack((time_data, amplitude_data))
 
 def get_num_signals(path: Path) -> dict[str, int]:
@@ -60,7 +68,9 @@ def get_file_prefix(path: Path, i: int, study_name: str) -> str:
     Returns:
         str: file prefix
     """
-    pattern = re.compile(rf'(.+)-{study_name}-((?:POS|NEG)-{i})\.txt')
+    pattern = re.compile(
+        rf'(.+)-{re.escape(study_name)}-((?:POS|NEG)-{i})\.txt'
+    )
     for filename in path.iterdir():
         if match := pattern.match(filename.name):
             return match.group(1)

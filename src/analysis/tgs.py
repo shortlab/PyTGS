@@ -1,3 +1,4 @@
+from pathlib import Path
 from typing import Tuple, Union
 
 import numpy as np
@@ -56,43 +57,63 @@ def tgs_fit(config: dict, paths: Paths, file_idx: int, pos_file: str, neg_file: 
             3. Iterative beta fitting
             4. Functional fit including thermal and acoustic components
     """
-    #  Isolate the name for each signal for labelling
-    ID1 = str(pos_file).rsplit("/")
-    ID2 = ID1[-1].rsplit("\\") #deals with both filepath conventions
-    file_id = ID2[-1].split(".txt")[0]
-    
+    file_id = Path(str(pos_file)).stem
+
     # Process signal and build fit functions
-    signal, max_time, start_time, start_idx = process_signal(config, paths, file_idx, pos_file, neg_file, grating_spacing, **config['signal_process'])
-    end_idx = int(len(signal) * signal_proportion) + start_idx
+    signal, max_time, start_time, start_idx = process_signal(
+        config, paths, file_idx, pos_file, neg_file, grating_spacing,
+        **config['signal_process']
+    )
+    end_idx = min(len(signal), int(len(signal) * signal_proportion) + start_idx)
     functional_function, thermal_function = tgs_function(start_time, grating_spacing)
 
-    # Thermal fit
+    # Initial thermal fit (β = 0): seed A and α from the erfc envelope alone.
     thermal_p0 = [0.05, 5e-4]
-    popt, _ = curve_fit(lambda x, A, alpha: thermal_function(x, A, 0, 0, alpha, 0, 0, 0, 0), signal[:, 0], signal[:, 1], p0=thermal_p0)
+    popt, _ = curve_fit(
+        lambda x, A, alpha: thermal_function(x, A, 0, 0, alpha, 0, 0, 0, 0),
+        signal[:, 0], signal[:, 1], p0=thermal_p0,
+    )
     A, alpha = popt
     if alpha <= 0:
         alpha = 1e-6
-    
+
     # Lorentzian fit on FFT of SAW signal
     saw_signal = np.column_stack([
-        signal[:, 0], 
-        signal[:, 1] - thermal_function(signal[:, 0], A, 0, 0, alpha, 0, 0, 0, 0)
+        signal[:, 0],
+        signal[:, 1] - thermal_function(signal[:, 0], A, 0, 0, alpha, 0, 0, 0, 0),
     ])
     fft_signal = fft(saw_signal, **config['fft'])
-    f, f_err, fwhm, tau, snr, frequency_bounds, lorentzian_function, lorentzian_popt, fft_segment, fft_full, lorentzian_curve = lorentzian_fit(config, paths, file_idx, fft_signal, **config['lorentzian'])
+    (f, f_err, fwhm, tau, snr, frequency_bounds,
+     lorentzian_function, lorentzian_popt,
+     fft_segment, fft_full, lorentzian_curve) = lorentzian_fit(
+        config, paths, file_idx, fft_signal, **config['lorentzian']
+    )
 
-    # Iteratively fit beta (displacement-reflectance ratio)
+    # Iteratively refine β from the analytic displacement/reflectance ratio and
+    # re-fit (A, α) against the thermal-only model, warm-starting from the
+    # previous iteration's solution.
     q = 2 * np.pi / (grating_spacing * 1e-6)
+    beta = 0.0
     for _ in range(10):
         displacement = q * np.sqrt(alpha / np.pi)
         reflectance = (q ** 2 * alpha + 1 / (2 * max_time))
         beta = displacement / reflectance
-        popt, _ = curve_fit(lambda x, A, alpha: thermal_function(x, A, 0, 0, alpha, beta, 0, 0, 0), signal[start_idx:end_idx, 0], signal[start_idx:end_idx, 1], p0=thermal_p0)
+        popt, _ = curve_fit(
+            lambda x, A, alpha: thermal_function(x, A, 0, 0, alpha, beta, 0, 0, 0),
+            signal[start_idx:end_idx, 0], signal[start_idx:end_idx, 1],
+            p0=[A, alpha],
+        )
         A, alpha = popt
+        if alpha <= 0:
+            alpha = 1e-6
 
     # Functional fit
-    functional_p0 = [0.05, 0.05, 0, alpha, beta, 0, tau, f]
-    tgs_popt, tgs_pcov = curve_fit(functional_function, signal[start_idx:end_idx, 0], signal[start_idx:end_idx, 1], p0=functional_p0, maxfev=maxfev)
+    functional_p0 = [A, 0.05, 0, alpha, beta, 0, tau, f]
+    tgs_popt, tgs_pcov = curve_fit(
+        functional_function,
+        signal[start_idx:end_idx, 0], signal[start_idx:end_idx, 1],
+        p0=functional_p0, maxfev=maxfev,
+    )
     A, B, C, alpha, beta, theta, tau, f = tgs_popt
     A_err, B_err, C_err, alpha_err, beta_err, theta_err, tau_err, f_err = np.sqrt(np.diag(tgs_pcov))
 

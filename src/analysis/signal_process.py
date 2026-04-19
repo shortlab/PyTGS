@@ -13,6 +13,8 @@ OFFSET_20NS = 19
 END_TIME_20NS = 2e-7
 OFFSET_50NS = 23
 END_TIME_50NS = 5e-7
+SCOPE_SPAN_BOUNDARY = 3e-7
+END_SAMPLE_TRIM = 36
 
 LARGE_GRATING_THRESHOLD = 6
 LARGE_GRATING_INDEX = 20
@@ -53,22 +55,24 @@ def find_pump_time(pos_signal: np.ndarray, neg_signal: np.ndarray, initial_sampl
     second_derivative = np.gradient(first_derivative)
 
     max_second_derivative_idx = np.argmax(second_derivative[:max_time + 1])
-    prominence = PROMINENCE_FACTOR * np.max(second_derivative[:initial_samples])
-    peak_idxs, _ = find_peaks(second_derivative[:max_time + 1], prominence=prominence)
+    prominence = PROMINENCE_FACTOR * float(np.max(second_derivative[:initial_samples]))
+    if prominence <= 0:
+        prominence = PROMINENCE_FACTOR * float(np.std(np.abs(second_derivative[:initial_samples])))
+    peak_kwargs = {'prominence': prominence} if prominence > 0 else {}
+    peak_idxs, _ = find_peaks(second_derivative[:max_time + 1], **peak_kwargs)
 
     if len(peak_idxs) > 0:
         max_peak_idx = np.argmax(second_derivative[peak_idxs])
         if peak_idxs[max_peak_idx] < max_second_derivative_idx:
             max_second_derivative_idx = peak_idxs[max_peak_idx]
 
-    # Adjust time index and determine end time
-    time_len = len(signal[:, 0]) / 1e3
-    if time_len < 5:
-        # 20 ns oscilloscope
+    time_span = float(signal[-1, 0] - signal[0, 0])
+    if time_span < SCOPE_SPAN_BOUNDARY:
+        # 20 ns/div oscilloscope (~200 ns total span)
         end_time = END_TIME_20NS
         pump_time_idx = max(0, max_second_derivative_idx - OFFSET_20NS)
     else:
-        # 50 ns oscilloscope
+        # 50 ns/div oscilloscope (~500 ns total span)
         end_time = END_TIME_50NS
         pump_time_idx = max(0, max_second_derivative_idx - OFFSET_50NS)
 
@@ -99,7 +103,7 @@ def find_start_time(signal: np.ndarray, grating_spacing: float, time_step: float
         Tuple[int, float]: (start index, start time)
     """
     if null_point < 1 or null_point > 4:
-        start_time = signal[0, 0]
+        raise ValueError(f"null_point must be in 1..4, got {null_point}")
 
     if grating_spacing > LARGE_GRATING_THRESHOLD:
         idx = LARGE_GRATING_INDEX
@@ -160,7 +164,7 @@ def find_start_time(signal: np.ndarray, grating_spacing: float, time_step: float
             elif null_point == 3:
                 start_time = neg_locs[0] + 0.5 * (pos_locs[1] - neg_locs[0])
             elif null_point == 4:
-                start_time = pos_locs[1] + 0.5 * (neg_locs[0] - pos_locs[1])
+                start_time = pos_locs[1] + 0.5 * (neg_locs[1] - pos_locs[1])
 
     start_idx = int(start_time / time_step)
     return start_idx, start_time
@@ -220,7 +224,7 @@ def process_signal(config: dict, paths: Paths, file_idx: int, pos_file: str, neg
 
     pump_time_idx, end_time = find_pump_time(pos, neg, initial_samples)
     time_step = pos[1, 0] - pos[0, 0]
-    end_idx = int(end_time / time_step) - 36
+    end_idx = int(end_time / time_step) - END_SAMPLE_TRIM
 
     reference_time = neg[pump_time_idx, 0]
     if grating_spacing < GRATING_SPACING_THRESHOLD:
@@ -233,7 +237,7 @@ def process_signal(config: dict, paths: Paths, file_idx: int, pos_file: str, neg
         pos[pump_time_idx:end_idx, 1] - neg[pump_time_idx:end_idx, 1] - offset_correction
     ])
 
-    max_idx = np.argmax(signal[TIME_OFFSET_INDEX:, 1]) + TIME_OFFSET_INDEX - 1
+    max_idx = int(np.argmax(signal[TIME_OFFSET_INDEX:, 1])) + TIME_OFFSET_INDEX
     max_time = signal[max_idx, 0]
     start_idx, start_time = find_start_time(signal[max_idx:], grating_spacing, time_step, null_point)
 

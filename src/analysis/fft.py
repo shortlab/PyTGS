@@ -2,74 +2,78 @@ import numpy as np
 from scipy.signal import periodogram, savgol_filter, windows
 
 NOISE_CUTOFF_POINTS = 1000
+NFFT_TARGET = 2 ** 18
+SAVGOL_WINDOW = 201
+SAVGOL_POLYORDER = 5
 
-def fft(saw_signal: np.ndarray, signal_proportion: float = 0.9, analysis_type: str = 'psd') -> np.ndarray:
+
+def fft(
+    saw_signal: np.ndarray,
+    signal_proportion: float = 1.0,
+    analysis_type: str = 'psd',
+    use_derivative: bool = False,
+) -> np.ndarray:
     """
     Generates a filtered Fast Fourier Transform of SAW signal.
-    
     Parameters:
-        saw_signal (np.ndarray): SAW signal data array of shape (N, 2) containing frequency and amplitude
-        signal_proportion (float, optional): portion of signal to include in fit
-        noise_cutoff_points (int, optional): number of points zero out at start/end of spectrum to remove noise
-        analysis_type (str, optional): whether to output power spectral density ('psd') or fast fourier transform ('fft')
-        
+        saw_signal: (N, 2) array of [time s, amplitude].
+        signal_proportion: fraction of the signal to keep (0, 1].
+        analysis_type: 'psd' for power spectral density or 'fft' for |FFT|.
+        use_derivative: FFT the time derivative rather than the raw signal.
+
     Returns:
-        transformed_signal (np.ndarray): transformed signal array of shape (M, 2) where:
-            - First column contains frequency values in Hz
-            - Second column contains corresponding amplitudes
-            - M is the number of frequency points after transformation
-            - If analysis_type='psd', amplitudes represent power spectral density
-            - If analysis_type='fft', amplitudes represent Fourier coefficients
+        (M, 2) array of [frequency Hz, spectrum amplitude].
     """
-    N, _ = saw_signal.shape
-    M = int(np.ceil(N * signal_proportion))
+    if analysis_type not in ('psd', 'fft'):
+        raise ValueError(
+            f"analysis_type must be 'psd' or 'fft', got {analysis_type!r}"
+        )
 
-    saw_signal = saw_signal[:M]
-    saw_signal[:, 1] /= np.max(saw_signal[:, 1])
+    N = len(saw_signal)
+    if N < 2:
+        raise ValueError(f"saw_signal must have at least 2 samples, got {N}")
+    M = max(2, int(np.ceil(N * signal_proportion)))
 
-    time = saw_signal[:, 0]
-    amplitude = saw_signal[:, 1]
-    t_step = time[-1] - time[-2]
+    time = np.asarray(saw_signal[:M, 0], dtype=float)
+    amplitude = np.asarray(saw_signal[:M, 1], dtype=float)
 
-    derivative = np.diff(amplitude) / t_step
-    derivative /= np.max(derivative)
-    saw_signal = np.vstack((time[:-1], derivative)).T
+    amp_max = float(np.max(np.abs(amplitude)))
+    if amp_max > 0:
+        amplitude = amplitude / amp_max
 
-    num_points = len(saw_signal)
-    fs = num_points / (time[-1] - time[0])
-    pad_size = 2 ** 18 - num_points - 2
-    pad_time = np.arange(time[-1], time[-1] + pad_size * t_step, t_step)
-    pad_amplitude = np.full(pad_size, 0)
+    t_step = float(time[-1] - time[-2])
+    if t_step <= 0:
+        raise ValueError("saw_signal time column must be strictly increasing")
+    fs = 1.0 / t_step
 
-    if len(pad_time) != len(pad_amplitude):
-        min_pad_length = min(len(pad_time), len(pad_amplitude))
-        pad_time = pad_time[:min_pad_length]
-        pad_amplitude = pad_amplitude[:min_pad_length]
-    
-    pad_signal = np.vstack((
-        np.hstack((time, pad_time)),
-        np.hstack((amplitude, pad_amplitude))
-    )).T
+    if use_derivative:
+        data = np.gradient(amplitude, t_step)
+    else:
+        data = amplitude
 
-    nfft = len(pad_signal)
-    frequencies, power_spectral_density = periodogram(
-        pad_signal[:, 1],
-        fs=fs,
-        window=windows.hamming(nfft),
-        nfft=nfft
-    )
+    num_points = len(data)
+    windowed = data * windows.hamming(num_points)
 
-    npsd = int(np.ceil(len(power_spectral_density)))
-    power_spectral_density[:NOISE_CUTOFF_POINTS] = 0
-    power_spectral_density[npsd:] = 0
-    power_spectral_density /= np.max(power_spectral_density)
+    nfft = max(NFFT_TARGET, num_points)
+    padded = np.concatenate([windowed, np.zeros(nfft - num_points)])
 
-    if analysis_type == 'psd':
-        amplitudes = power_spectral_density[:-1]
-    elif analysis_type == 'fft':
-        amplitudes = np.sqrt(power_spectral_density[:-1])
+    frequencies, psd = periodogram(padded, fs=fs, window='boxcar', nfft=nfft)
 
-    filtered_amplitudes = savgol_filter(amplitudes, window_length=201, polyorder=5)
-    transformed_signal = np.vstack((frequencies[:-1], filtered_amplitudes)).T
+    cutoff = min(NOISE_CUTOFF_POINTS, len(psd))
+    psd[:cutoff] = 0
 
-    return transformed_signal
+    psd_max = float(np.max(psd))
+    if psd_max > 0:
+        psd = psd / psd_max
+
+    amplitudes = psd if analysis_type == 'psd' else np.sqrt(psd)
+
+    window_length = min(SAVGOL_WINDOW, len(amplitudes) - (1 if len(amplitudes) % 2 == 0 else 0))
+    if window_length % 2 == 0:
+        window_length -= 1
+    if window_length > SAVGOL_POLYORDER:
+        amplitudes = savgol_filter(
+            amplitudes, window_length=window_length, polyorder=SAVGOL_POLYORDER
+        )
+
+    return np.column_stack((frequencies, amplitudes))

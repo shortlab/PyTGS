@@ -25,19 +25,19 @@ def tgs_function(start_time: float, grating_spacing: float) -> Tuple[callable, c
         Functional fit function.
 
         Equation:
-            I(t) = A [erfc(q √(αt)) - (β/√t) e^(-q²αt)] + B sin(2πft + Θ) e^(-t/τ) + C
+            I(t) = A [erfc(q √(αt)) + (β/√t) e^(-q²αt)] + B sin(2πft + Θ) e^(-t/τ) + C
 
         Parameters:
-            x (np.ndarray): time array [s]
-            A (float): constant [W/m²]
-            B (float): constant [W/m²]
-            C (float): constant [W/m²]
+            x (np.ndarray): time array [s], measured from the null-point start
+            A (float): thermal signal amplitude [W/m²]
+            B (float): acoustic signal amplitude [W/m²]
+            C (float): signal offset [W/m²]
             alpha (α) (float): thermal diffusivity [m²/s]
-            beta (β) (float): displacement-reflectance ratio [s⁰⋅⁵]
+            beta (β) (float): displacement-reflectance ratio [s⁰·⁵]
             theta (Θ) (float): acoustic phase [rad]
             tau (τ) (float): acoustic decay constant [s]
             f (float): surface acoustic wave frequency [Hz]
-            q (float): excitation wave vector [rad/µm]
+            q (float): excitation wave vector [rad/m]
 
         Returns:
             np.ndarray: functional fit response [W/m²]
@@ -54,15 +54,15 @@ def tgs_function(start_time: float, grating_spacing: float) -> Tuple[callable, c
         Thermal fit function.
 
         Equation:
-            I(t) = A [erfc(q √(αt)) - (β/√t) e^(-q²αt)] + C
+            I_T(t) = A [erfc(q √(αt)) + (β/√t) e^(-q²αt)] + C
 
         Parameters:
             x (np.ndarray): time array [s]
-            A (float): constant [W/m²]
-            C (float): constant [W/m²]
+            A (float): thermal signal amplitude [W/m²]
             alpha (α) (float): thermal diffusivity [m²/s]
-            beta (β) (float): thermal conductivity [W/(m·K)]
-            q (float): excitation wave vector [rad/µm]
+            beta (β) (float): displacement-reflectance ratio [s⁰·⁵]
+            C (float): signal offset [W/m²]
+            q (float): excitation wave vector [rad/m]
 
         Returns:
             np.ndarray: thermal fit response [W/m²]
