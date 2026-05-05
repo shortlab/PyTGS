@@ -1,0 +1,35 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "pytgs"
+version = "0.1.0"
+description = "Python library for transient grating spectroscopy (TGS) processing"
+authors = [{ name = "Akarsh Aurora" }]
+readme = "README.md"
+requires-python = ">=3.8"
+license = { text = "MIT" }
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+]
+dependencies = [
+    "numpy",
+    "scipy",
+    "pandas",
+    "pyyaml",
+]
+
+[project.optional-dependencies]
+test = ["pytest"]
+
+[project.urls]
+Homepage = "https://github.com/shortlab/PyTGS"
+
+[project.scripts]
+pytgs = "pytgs.cli:main"
+
+[tool.setuptools.packages.find]
+include = ["pytgs*"]

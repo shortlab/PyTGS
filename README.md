@@ -39,7 +39,7 @@ A Python tool for thermo-mechanical property analysis of transient grating spect
    source PyTGS-venv/bin/activate
    
    pip install --upgrade pip
-   pip install -e .  # or pip install -r requirements.txt
+   pip install -e .
    ```
 
 ## Usage
@@ -60,11 +60,11 @@ A Python tool for thermo-mechanical property analysis of transient grating spect
 
 3. Run the analysis:
    ```bash
-   python main.py
+   pytgs
    ```
 
    Fitting results and figures will be saved in `fit/` and `figures/` directories, respectively.
-   You can view example input/output files in the `example/` directory.
+   You can view example input/output files in the `examples/` directory.
 
 ## Testing
 
@@ -72,5 +72,5 @@ The package includes tests that validate correctness of the analysis pipeline us
 
 To run the tests, use the following command:
 ```bash
-pytest tests/test.py -v
+pytest pytgs/tests/test.py -v
 ```

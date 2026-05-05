@@ -1,0 +1,37 @@
+{
+  "name": "web",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "prebuild": "node scripts/copy-pytgs-src.mjs",
+    "predev": "node scripts/copy-pytgs-src.mjs",
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "eslint",
+    "copy-src": "node scripts/copy-pytgs-src.mjs"
+  },
+  "dependencies": {
+    "@types/react-plotly.js": "^2.6.4",
+    "clsx": "^2.1.1",
+    "lucide-react": "^1.8.0",
+    "next": "16.2.4",
+    "plotly.js-dist-min": "^3.5.0",
+    "react": "19.2.4",
+    "react-dom": "19.2.4",
+    "react-plotly.js": "^2.6.0",
+    "tailwind-merge": "^3.5.0"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4",
+    "@types/node": "^20",
+    "@types/plotly.js": "^3.0.10",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "eslint": "^9",
+    "eslint-config-next": "16.2.4",
+    "pyodide": "^0.29.3",
+    "tailwindcss": "^4",
+    "typescript": "^5"
+  }
+}

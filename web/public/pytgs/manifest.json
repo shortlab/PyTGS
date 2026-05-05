@@ -1,0 +1,16 @@
+{
+  "files": [
+    "pytgs/__init__.py",
+    "pytgs/analyzer.py",
+    "pytgs/cli.py",
+    "pytgs/fft.py",
+    "pytgs/functions.py",
+    "pytgs/io.py",
+    "pytgs/lorentzian.py",
+    "pytgs/paths.py",
+    "pytgs/signal_process.py",
+    "pytgs/tgs.py",
+    "config.yaml"
+  ],
+  "generatedAt": "2026-04-21T19:03:28.820Z"
+}

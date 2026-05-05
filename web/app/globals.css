@@ -1,0 +1,343 @@
+@import "tailwindcss";
+
+@theme {
+  /* Brand — ocean blue */
+  --color-brand: #1d5f8e;
+  --color-brand-strong: #134668;
+  --color-brand-soft: #dfecf5;
+
+  /* Surfaces — warm paper */
+  --color-ink: #0e1117;
+  --color-body: #262a33;
+  --color-muted: #6e7380;
+  --color-rule: #e6e2d8;
+  --color-surface: #ffffff;
+  --color-surface-alt: #f6f2e8;
+  --color-surface-alt-2: #ede8d8;
+
+  /* Dark palette (header / footer / hero gradient floor) */
+  --color-dark: #0a0d12;
+  --color-dark-2: #141820;
+  --color-dark-3: #1e2430;
+
+  /* Hero — sky to ocean */
+  --color-hero: #bfd8e8;
+  --color-hero-deep: #2a6a94;
+
+  /* Semantic (kept for status) */
+  --color-ok: #0f9d58;
+  --color-warn: #b45309;
+  --color-err: #b91c1c;
+
+  /* Legacy psfc-* aliases (existing classnames keep working) */
+  --color-psfc-red: var(--color-brand);
+  --color-psfc-red-dark: var(--color-brand-strong);
+  --color-psfc-red-soft: var(--color-brand-soft);
+  --color-psfc-ink: var(--color-ink);
+  --color-psfc-body: var(--color-body);
+  --color-psfc-muted: var(--color-muted);
+  --color-psfc-rule: var(--color-rule);
+  --color-psfc-surface: var(--color-surface);
+  --color-psfc-surface-alt: var(--color-surface-alt);
+  --color-psfc-surface-alt-2: var(--color-surface-alt-2);
+  --color-psfc-footer: var(--color-dark);
+  --color-psfc-link: #0b5ea8;
+  --color-psfc-accent: var(--color-brand);
+
+  --font-sans:
+    var(--font-inter, "Inter"), -apple-system, BlinkMacSystemFont, "Segoe UI",
+    system-ui, Roboto, "Helvetica Neue", Helvetica, Arial, sans-serif;
+  --font-mono:
+    ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono",
+    "Courier New", monospace;
+
+  --radius-card: 14px;
+  --radius-pill: 9999px;
+
+  --shadow-card:
+    0 1px 2px rgba(15, 15, 30, 0.04),
+    0 1px 3px rgba(15, 15, 30, 0.05);
+  --shadow-card-hover:
+    0 2px 4px rgba(15, 15, 30, 0.06),
+    0 10px 24px rgba(15, 15, 30, 0.08);
+  --shadow-hero:
+    0 30px 60px -30px rgba(29, 95, 142, 0.38);
+}
+
+html {
+  scroll-behavior: smooth;
+  scroll-padding-top: 4.5rem;
+}
+
+html,
+body {
+  background: var(--color-surface);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  font-feature-settings:
+    "cv11", "ss01", "ss03";
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+@layer base {
+  h1,
+  h2,
+  h3,
+  h4 {
+    color: var(--color-ink);
+    letter-spacing: -0.02em;
+  }
+  h1 {
+    font-weight: 700;
+    line-height: 1.05;
+  }
+  h2,
+  h3 {
+    font-weight: 600;
+    line-height: 1.15;
+  }
+  p,
+  li,
+  span {
+    color: var(--color-body);
+  }
+  a {
+    color: inherit;
+    text-decoration: none;
+  }
+  a:hover {
+    text-decoration: none;
+  }
+  ::selection {
+    background: var(--color-brand);
+    color: #fff;
+  }
+  :focus-visible {
+    outline: 2px solid var(--color-brand);
+    outline-offset: 2px;
+    border-radius: 6px;
+  }
+}
+
+@layer components {
+  .psfc-container {
+    width: 100%;
+    max-width: 1200px;
+    margin-left: auto;
+    margin-right: auto;
+    padding-left: 1.25rem;
+    padding-right: 1.25rem;
+  }
+
+  .psfc-card {
+    background: var(--color-surface);
+    border: 1px solid var(--color-rule);
+    border-radius: var(--radius-card);
+    box-shadow: var(--shadow-card);
+    transition: box-shadow 0.2s ease, border-color 0.2s ease;
+  }
+  .psfc-card:hover {
+    box-shadow: var(--shadow-card-hover);
+  }
+
+  .psfc-section-title {
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--color-ink);
+  }
+
+  /* Pill button — shape matches MIT PSFC landing CTAs */
+  .psfc-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    font-size: 0.8125rem;
+    font-weight: 500;
+    line-height: 1;
+    border-radius: var(--radius-pill);
+    border: 1px solid var(--color-rule);
+    background: var(--color-surface);
+    color: var(--color-ink);
+    transition:
+      background 0.18s ease,
+      border-color 0.18s ease,
+      color 0.18s ease,
+      transform 0.18s ease,
+      box-shadow 0.18s ease;
+    cursor: pointer;
+    white-space: nowrap;
+  }
+  .psfc-btn:hover:not(:disabled) {
+    border-color: var(--color-ink);
+  }
+  .psfc-btn:active:not(:disabled) {
+    transform: translateY(1px);
+  }
+  .psfc-btn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+
+  .psfc-btn-primary {
+    background: var(--color-brand);
+    color: #ffffff;
+    border-color: var(--color-brand);
+  }
+  .psfc-btn-primary:hover:not(:disabled) {
+    background: var(--color-brand-strong);
+    border-color: var(--color-brand-strong);
+  }
+
+  .psfc-btn-dark {
+    background: var(--color-dark);
+    color: #ffffff;
+    border-color: var(--color-dark);
+  }
+  .psfc-btn-dark:hover:not(:disabled) {
+    background: var(--color-dark-2);
+    border-color: var(--color-dark-2);
+  }
+
+  .psfc-btn-ghost {
+    background: transparent;
+    border-color: transparent;
+    color: var(--color-body);
+  }
+  .psfc-btn-ghost:hover:not(:disabled) {
+    background: var(--color-surface-alt);
+    border-color: transparent;
+    color: var(--color-ink);
+  }
+
+  /* Dark-surface pill (for header on black) */
+  .psfc-btn-on-dark {
+    background: transparent;
+    color: #ffffff;
+    border-color: rgba(255, 255, 255, 0.25);
+  }
+  .psfc-btn-on-dark:hover:not(:disabled) {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: rgba(255, 255, 255, 0.55);
+  }
+
+  .psfc-input {
+    display: block;
+    width: 100%;
+    padding: 0.55rem 0.8rem;
+    font-size: 0.875rem;
+    font-family: var(--font-mono);
+    background: var(--color-surface);
+    border: 1px solid var(--color-rule);
+    border-radius: 8px;
+    color: var(--color-ink);
+    transition:
+      border-color 0.15s,
+      box-shadow 0.15s;
+  }
+  .psfc-input:hover {
+    border-color: #c7c3d4;
+  }
+  .psfc-input:focus {
+    outline: none;
+    border-color: var(--color-brand);
+    box-shadow: 0 0 0 3px rgba(29, 95, 142, 0.2);
+  }
+
+  .psfc-label {
+    display: block;
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--color-muted);
+    margin-bottom: 0.375rem;
+  }
+
+  .psfc-link-underline {
+    background-image: linear-gradient(
+      to right,
+      currentColor,
+      currentColor
+    );
+    background-position: 0 100%;
+    background-repeat: no-repeat;
+    background-size: 0% 1px;
+    transition: background-size 0.25s ease;
+  }
+  .psfc-link-underline:hover {
+    background-size: 100% 1px;
+  }
+
+  .psfc-eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--color-ink);
+  }
+  .psfc-eyebrow::before {
+    content: "";
+    width: 18px;
+    height: 2px;
+    background: var(--color-ink);
+    display: inline-block;
+  }
+}
+
+@layer utilities {
+  .psfc-divider {
+    border-top: 1px solid var(--color-rule);
+  }
+  .psfc-divider-thick {
+    height: 3px;
+    background: linear-gradient(
+      to right,
+      var(--color-brand) 0%,
+      var(--color-hero-deep) 50%,
+      var(--color-brand) 100%
+    );
+  }
+  .psfc-hero-bg {
+    background: var(--color-hero);
+    background-image:
+      radial-gradient(
+        ellipse 60% 80% at 90% 10%,
+        rgba(255, 255, 255, 0.6) 0%,
+        transparent 60%
+      ),
+      radial-gradient(
+        ellipse 50% 70% at 10% 90%,
+        rgba(42, 106, 148, 0.45) 0%,
+        transparent 60%
+      );
+  }
+  .scrollbar-thin {
+    scrollbar-width: thin;
+    scrollbar-color: #c4c4c4 transparent;
+  }
+  .scrollbar-thin::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+  .scrollbar-thin::-webkit-scrollbar-thumb {
+    background: #c4c4c4;
+    border-radius: 4px;
+  }
+  .scrollbar-thin::-webkit-scrollbar-track {
+    background: transparent;
+  }
+}

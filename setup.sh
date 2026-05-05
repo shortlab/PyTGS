@@ -50,4 +50,4 @@ else
     echo -e "1. Activate the virtual environment with: ${BLUE}source PyTGS-venv/bin/activate${NC}"
 fi
 echo -e "2. Edit config.yaml with your data path and desired fitting parameters"
-echo -e "3. Run the analysis with: ${BLUE}python main.py${NC}"
+echo -e "3. Run the analysis with: ${BLUE}pytgs${NC}"
